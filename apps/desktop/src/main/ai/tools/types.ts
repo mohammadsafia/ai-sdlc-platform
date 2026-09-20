@@ -9,6 +9,7 @@
 import type { z } from 'zod/v3';
 
 import type { SecurityProfile } from '../security/bash-validator';
+import type { SkillsSnapshot } from '../skills/types';
 
 // ---------------------------------------------------------------------------
 // Tool Context
@@ -31,6 +32,10 @@ export interface ToolContext {
   abortSignal?: AbortSignal;
   /** If set, Write/Edit tools can only write within these directories */
   allowedWritePaths?: string[];
+  /** Resolved project skills for this session (read-only). Absent = no skills. */
+  skillsSnapshot?: SkillsSnapshot;
+  /** Agent type using this context; recorded in skill usage logs. */
+  agentType?: string;
 }
 
 // ---------------------------------------------------------------------------

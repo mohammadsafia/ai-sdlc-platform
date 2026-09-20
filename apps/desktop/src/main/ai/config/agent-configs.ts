@@ -21,7 +21,7 @@ import type { ThinkingLevel } from './types';
 // =============================================================================
 
 /** Core file reading tools */
-const BASE_READ_TOOLS = ['Read', 'Glob', 'Grep'] as const;
+const BASE_READ_TOOLS = ['Read', 'Glob', 'Grep', 'load_skill'] as const;
 
 /** Core file writing tools */
 const BASE_WRITE_TOOLS = ['Write', 'Edit', 'Bash'] as const;
