@@ -243,6 +243,11 @@ export function injectContext(promptTemplate: string, context: PromptContext): s
     );
   }
 
+  // 4b. Project skills (pinned bodies + catalog), built by ai/skills/prompt-section.ts
+  if (context.skillsSection) {
+    sections.push(context.skillsSection);
+  }
+
   // 5. Base prompt
   sections.push(promptTemplate);
 

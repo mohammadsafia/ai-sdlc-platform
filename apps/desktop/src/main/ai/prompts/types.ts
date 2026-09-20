@@ -18,6 +18,8 @@ export interface PromptContext {
   projectDir: string;
   /** Project instructions from AGENTS.md (preferred) or CLAUDE.md (fallback) */
   projectInstructions?: string | null;
+  /** Pre-built `## PROJECT SKILLS` section (see ai/skills/prompt-section.ts). Empty/undefined = omit. */
+  skillsSection?: string;
   /** Base branch name for git comparisons (e.g., "main", "develop") */
   baseBranch?: string;
   /** Human input from HUMAN_INPUT.md (for coder prompts) */
