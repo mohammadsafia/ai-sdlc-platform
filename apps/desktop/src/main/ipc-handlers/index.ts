@@ -34,6 +34,7 @@ import { registerProfileHandlers } from './profile-handlers';
 import { registerScreenshotHandlers } from './screenshot-handlers';
 import { registerTerminalWorktreeIpcHandlers } from './terminal';
 import { registerCodexAuthHandlers } from './codex-auth-handlers';
+import { registerSkillsHandlers } from './skills-handlers';
 import { notificationService } from '../notification-service';
 import { setAgentManagerRef } from './utils';
 
@@ -126,6 +127,7 @@ export function setupIpcHandlers(
 
   // Codex OAuth authentication handlers
   registerCodexAuthHandlers();
+  registerSkillsHandlers();
 
   console.warn('[IPC] All handler modules registered successfully');
 }

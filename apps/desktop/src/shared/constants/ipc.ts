@@ -10,6 +10,10 @@ export const IPC_CHANNELS = {
   PROJECT_LIST: 'project:list',
   PROJECT_UPDATE_SETTINGS: 'project:updateSettings',
   PROJECT_INITIALIZE: 'project:initialize',
+
+  // Project skills
+  SKILLS_LIST: 'skills:list',
+  SKILLS_REFRESH: 'skills:refresh',
   PROJECT_CHECK_VERSION: 'project:checkVersion',
 
   // Tab state operations (persisted in main process)

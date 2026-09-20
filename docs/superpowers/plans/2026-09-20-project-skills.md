@@ -2727,17 +2727,18 @@ In `apps/desktop/src/shared/constants/ipc.ts`, inside `IPC_CHANNELS` add a block
 // apps/desktop/src/main/ipc-handlers/__tests__/skills-handlers.test.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const handlers = new Map<string, (...args: unknown[]) => unknown>();
+const { handlers, resolveSkills, refreshSkills, getProject } = vi.hoisted(() => ({
+  handlers: new Map<string, (...args: unknown[]) => unknown>(),
+  resolveSkills: vi.fn(),
+  refreshSkills: vi.fn(),
+  getProject: vi.fn(),
+}));
+
 vi.mock('electron', () => ({
   ipcMain: { handle: vi.fn((channel: string, fn: (...args: unknown[]) => unknown) => handlers.set(channel, fn)) },
   app: { getPath: vi.fn(() => '/tmp/userData') },
 }));
-
-const resolveSkills = vi.fn();
-const refreshSkills = vi.fn();
 vi.mock('../../ai/skills/resolve', () => ({ resolveSkills, refreshSkills }));
-
-const getProject = vi.fn();
 vi.mock('../../project-store', () => ({ projectStore: { getProject } }));
 
 import { registerSkillsHandlers } from '../skills-handlers';

@@ -1,5 +1,6 @@
 import { ipcRenderer } from 'electron';
 import { IPC_CHANNELS } from '../../shared/constants';
+import type { SkillsSnapshot } from '../../main/ai/skills/types';
 import type {
   Project,
   ProjectSettings,
@@ -30,6 +31,10 @@ export interface ProjectAPI {
   ) => Promise<IPCResult>;
   initializeProject: (projectId: string) => Promise<IPCResult<InitializationResult>>;
   checkProjectVersion: (projectId: string) => Promise<IPCResult<AutoBuildVersionInfo>>;
+
+  // Project skills (read-only)
+  listSkills: (projectId: string) => Promise<IPCResult<SkillsSnapshot>>;
+  refreshSkills: (projectId: string) => Promise<IPCResult<SkillsSnapshot>>;
 
   // Tab State (persisted in main process for reliability)
   getTabState: () => Promise<IPCResult<TabState>>;
@@ -157,6 +162,10 @@ export const createProjectAPI = (): ProjectAPI => ({
 
   checkProjectVersion: (projectId: string): Promise<IPCResult<AutoBuildVersionInfo>> =>
     ipcRenderer.invoke(IPC_CHANNELS.PROJECT_CHECK_VERSION, projectId),
+  listSkills: (projectId: string): Promise<IPCResult<SkillsSnapshot>> =>
+    ipcRenderer.invoke(IPC_CHANNELS.SKILLS_LIST, projectId),
+  refreshSkills: (projectId: string): Promise<IPCResult<SkillsSnapshot>> =>
+    ipcRenderer.invoke(IPC_CHANNELS.SKILLS_REFRESH, projectId),
 
   // Tab State (persisted in main process for reliability)
   getTabState: (): Promise<IPCResult<TabState>> =>
