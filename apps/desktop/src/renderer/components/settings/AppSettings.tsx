@@ -250,7 +250,7 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
           <div className="flex h-full">
             {/* Navigation sidebar */}
             <nav className="w-80 border-r border-border bg-muted/30 p-4">
-              <ScrollArea className="h-full">
+              <ScrollArea className="h-full" viewportClassName="[&>div]:block! [&>div]:min-w-0">
                 <div className="space-y-6">
                   {/* APPLICATION Section */}
                   <div>

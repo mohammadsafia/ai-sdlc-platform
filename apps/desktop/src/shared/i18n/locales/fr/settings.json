@@ -395,10 +395,16 @@
       "syncDescription": "Synchroniser avec GitLab Issues"
     },
     "skills": {
+      "howToTitle": "Ajouter ou épingler des compétences",
+      "howToLocal": "Ajoutez une compétence locale sous forme de dossier contenant un SKILL.md (name et description dans son en-tête) :",
+      "howToConfig": "Épinglez des compétences à des étapes ou des agents, ou déclarez des dépôts Git centraux, dans :",
+      "howToLock": "Après Actualiser, validez le fichier de verrouillage pour que toute l'équipe résolve les mêmes commits :",
+      "warningsCount_one": "{{count}} avertissement",
+      "warningsCount_other": "{{count}} avertissements",
       "title": "Compétences",
       "description": "Compétences d'agent partagées avec l'équipe",
       "integrationTitle": "Compétences du projet",
-      "integrationDescription": "Compétences découvertes dans .claude/skills et les dépôts centraux. Lecture seule ; modifiez .claude/skills.json dans le dépôt pour changer les épingles ou les sources.",
+      "integrationDescription": "Compétences d'agent trouvées dans ce dépôt et ses dépôts centraux de compétences. Lecture seule.",
       "refresh": "Actualiser",
       "refreshing": "Actualisation…",
       "empty": "Aucune compétence trouvée. Ajoutez un dossier avec SKILL.md sous .claude/skills/ ou déclarez des dépôts centraux dans .claude/skills.json.",
@@ -423,8 +429,7 @@
         "title": "Dépôts centraux",
         "commit": "Commit {{commit}} sur {{ref}}",
         "unlocked": "Pas encore résolu. Cliquez sur Actualiser puis validez .claude/skills.lock.json."
-      },
-      "howTo": "Ajouter une compétence : créez .claude/skills/<nom>/SKILL.md avec name et description dans son en-tête. Épinglez des compétences ou ajoutez des dépôts centraux dans .claude/skills.json."
+      }
     },
     "memory": {
       "title": "Mémoire",

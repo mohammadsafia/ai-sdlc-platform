@@ -395,10 +395,16 @@
       "syncDescription": "Sync with GitLab Issues"
     },
     "skills": {
+      "howToTitle": "How to add or pin skills",
+      "howToLocal": "Add a local skill as a folder with a SKILL.md (name and description in its frontmatter):",
+      "howToConfig": "Pin skills to stages or agents, or declare central Git repositories, in:",
+      "howToLock": "After Refresh, commit the lockfile so the whole team resolves the same commits:",
+      "warningsCount_one": "{{count}} warning",
+      "warningsCount_other": "{{count}} warnings",
       "title": "Skills",
       "description": "Agent skills shared with the team",
       "integrationTitle": "Project Skills",
-      "integrationDescription": "Skills discovered from .claude/skills and central repositories. Read-only; edit .claude/skills.json in the repository to change pins or sources.",
+      "integrationDescription": "Agent skills found in this repository and its central skill repositories. Read-only.",
       "refresh": "Refresh",
       "refreshing": "Refreshing…",
       "empty": "No skills found. Add a folder with SKILL.md under .claude/skills/ or declare central repositories in .claude/skills.json.",
@@ -423,8 +429,7 @@
         "title": "Central repositories",
         "commit": "Commit {{commit}} on {{ref}}",
         "unlocked": "Not resolved yet. Click Refresh and commit .claude/skills.lock.json."
-      },
-      "howTo": "Add a skill: create .claude/skills/<name>/SKILL.md with name and description in its frontmatter. Pin skills or add central repositories in .claude/skills.json."
+      }
     },
     "memory": {
       "title": "Memory",
