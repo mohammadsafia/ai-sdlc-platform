@@ -108,6 +108,7 @@ import type {
   InsightsModelConfig
 } from './insights';
 import type { BrdDraftChunk, BrdDraftDone, BrdDraftError, BrdDraftRequest, BrdSummary } from './brd';
+import type { RequirementsDone, RequirementsError, RequirementsGenerateRequest, RequirementsProgress, RequirementsSet } from './requirements';
 import type {
   CompetitorAnalysis,
   Roadmap,
@@ -828,6 +829,16 @@ export interface ElectronAPI {
   onBrdDraftChunk: (callback: (chunk: BrdDraftChunk) => void) => () => void;
   onBrdDraftDone: (callback: (done: BrdDraftDone) => void) => () => void;
   onBrdDraftError: (callback: (error: BrdDraftError) => void) => () => void;
+
+  // Requirements set
+  requirementsRead: (projectId: string, slug: string) => Promise<IPCResult<{ set: RequirementsSet | null; currentBrdHash: string }>>;
+  requirementsWrite: (projectId: string, slug: string, set: RequirementsSet) => Promise<IPCResult<RequirementsSet>>;
+  requirementsApprove: (projectId: string, slug: string, set: RequirementsSet) => Promise<IPCResult<RequirementsSet>>;
+  requirementsGenerate: (projectId: string, request: RequirementsGenerateRequest) => Promise<IPCResult<{ runId: string }>>;
+  requirementsCancel: (runId: string) => Promise<IPCResult>;
+  onRequirementsProgress: (callback: (p: RequirementsProgress) => void) => () => void;
+  onRequirementsDone: (callback: (d: RequirementsDone) => void) => () => void;
+  onRequirementsError: (callback: (e: RequirementsError) => void) => () => void;
 
   // Task logs operations
   getTaskLogs: (projectId: string, specId: string) => Promise<IPCResult<TaskLogs | null>>;

@@ -238,6 +238,14 @@ const browserMockAPI: ElectronAPI = {
   onBrdDraftChunk: () => () => {},
   onBrdDraftDone: () => () => {},
   onBrdDraftError: () => () => {},
+  requirementsRead: async () => ({ success: true, data: { set: null, currentBrdHash: '' } }),
+  requirementsWrite: async () => ({ success: false, error: 'Not available in browser mock' }),
+  requirementsApprove: async () => ({ success: false, error: 'Not available in browser mock' }),
+  requirementsGenerate: async () => ({ success: false, error: 'Not available in browser mock' }),
+  requirementsCancel: async () => ({ success: false, error: 'Not available in browser mock' }),
+  onRequirementsProgress: () => () => undefined,
+  onRequirementsDone: () => () => undefined,
+  onRequirementsError: () => () => undefined,
   codexAuthLogin: async () => ({
     success: false,
     error: 'Codex OAuth not available in browser mock'

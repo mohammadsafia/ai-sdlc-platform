@@ -25,6 +25,16 @@ export const IPC_CHANNELS = {
   BRD_DRAFT_CHUNK: 'brd:draft-chunk',
   BRD_DRAFT_DONE: 'brd:draft-done',
   BRD_DRAFT_ERROR: 'brd:draft-error',
+
+  // Requirements set
+  REQUIREMENTS_READ: 'requirements:read',
+  REQUIREMENTS_WRITE: 'requirements:write',
+  REQUIREMENTS_APPROVE: 'requirements:approve',
+  REQUIREMENTS_GENERATE: 'requirements:generate',
+  REQUIREMENTS_CANCEL: 'requirements:cancel',
+  REQUIREMENTS_PROGRESS: 'requirements:progress',
+  REQUIREMENTS_DONE: 'requirements:done',
+  REQUIREMENTS_ERROR: 'requirements:error',
   PROJECT_CHECK_VERSION: 'project:checkVersion',
 
   // Tab state operations (persisted in main process)

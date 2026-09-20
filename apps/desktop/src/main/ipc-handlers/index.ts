@@ -26,6 +26,7 @@ import { registerIdeationHandlers } from './ideation-handlers';
 import { registerChangelogHandlers } from './changelog-handlers';
 import { registerInsightsHandlers } from './insights-handlers';
 import { registerBrdHandlers } from './brd-handlers';
+import { registerRequirementsHandlers } from './requirements-handlers';
 import { registerMemoryHandlers } from './memory-handlers';
 import { registerAppUpdateHandlers } from './app-update-handlers';
 import { registerDebugHandlers } from './debug-handlers';
@@ -105,6 +106,7 @@ export function setupIpcHandlers(
   // Insights handlers
   registerInsightsHandlers(getMainWindow);
   registerBrdHandlers(getMainWindow);
+  registerRequirementsHandlers(getMainWindow);
 
   // Memory & infrastructure handlers (for LadybugDB)
   registerMemoryHandlers();
