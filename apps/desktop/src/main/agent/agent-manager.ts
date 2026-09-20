@@ -1,4 +1,7 @@
 import { EventEmitter } from 'events';
+import { app } from 'electron';
+import { resolveSkills } from '../ai/skills/resolve';
+import type { SkillsSnapshot } from '../ai/skills/types';
 import path from 'path';
 import { existsSync, readdirSync, readFileSync } from 'fs';
 import { AgentState } from './agent-state';
@@ -376,6 +379,9 @@ export class AgentManager extends EventEmitter {
 
     // Build the serializable session config for the worker
     const resolvedSpecDir = specDir ?? path.join(projectPath, '.auto-claude', 'specs', taskId);
+    const skillsSnapshot = await this.resolveSkillsForLaunch(taskId, projectPath);
+    if (!skillsSnapshot) return;
+
     const sessionConfig: SerializableSessionConfig = {
       agentType: 'spec_orchestrator' as const,
       systemPrompt,
@@ -405,6 +411,7 @@ export class AgentManager extends EventEmitter {
         projectDir: projectPath,
         specDir: resolvedSpecDir,
         securityProfile: this.serializeSecurityProfile(projectPath),
+        skillsSnapshot,
       },
     };
 
@@ -503,6 +510,9 @@ export class AgentManager extends EventEmitter {
     const initialMessages = this.buildTaskExecutionMessages(worktreeSpecDir, specId, effectiveProjectDir);
 
     // Build the serializable session config for the worker
+    const skillsSnapshot = await this.resolveSkillsForLaunch(taskId, effectiveProjectDir);
+    if (!skillsSnapshot) return;
+
     const sessionConfig: SerializableSessionConfig = {
       agentType: 'build_orchestrator' as const,
       systemPrompt,
@@ -529,6 +539,7 @@ export class AgentManager extends EventEmitter {
         projectDir: effectiveProjectDir,
         specDir: worktreeSpecDir,
         securityProfile: this.serializeSecurityProfile(effectiveProjectDir),
+        skillsSnapshot,
       },
     };
 
@@ -609,6 +620,9 @@ export class AgentManager extends EventEmitter {
     const qaInitialMessages = this.buildQAInitialMessages(effectiveSpecDir, specId, effectiveProjectDir);
 
     // Build the serializable session config for the worker
+    const skillsSnapshot = await this.resolveSkillsForLaunch(taskId, effectiveProjectDir);
+    if (!skillsSnapshot) return;
+
     const sessionConfig: SerializableSessionConfig = {
       agentType: 'qa_reviewer',
       systemPrompt,
@@ -632,6 +646,7 @@ export class AgentManager extends EventEmitter {
         projectDir: effectiveProjectDir,
         specDir: effectiveSpecDir,
         securityProfile: this.serializeSecurityProfile(effectiveProjectDir),
+        skillsSnapshot,
       },
     };
 
@@ -919,6 +934,19 @@ export class AgentManager extends EventEmitter {
    * Serialize a project's SecurityProfile (Sets) into a SerializedSecurityProfile (arrays)
    * for transfer across worker thread boundaries.
    */
+  /**
+   * Resolve project skills for a launch. Returns null (after emitting an error)
+   * when the snapshot carries a blocking error, so callers can bail out.
+   */
+  private async resolveSkillsForLaunch(taskId: string, projectDir: string): Promise<SkillsSnapshot | null> {
+    const snapshot = await resolveSkills(projectDir, { userDataDir: app.getPath('userData') });
+    if (snapshot.error) {
+      this.emit('error', taskId, `Project skills error: ${snapshot.error}`);
+      return null;
+    }
+    return snapshot;
+  }
+
   private serializeSecurityProfile(projectDir: string): SerializedSecurityProfile {
     const profile = getSecurityProfile(projectDir);
     return {

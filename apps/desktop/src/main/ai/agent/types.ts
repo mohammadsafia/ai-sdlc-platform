@@ -10,6 +10,7 @@
 import type { ExecutionProgressData, ProcessType } from '../../../main/agent/types';
 import type { SessionConfig, SessionResult, StreamEvent } from '../session/types';
 import type { RunnerOptions } from '../session/runner';
+import type { SkillsSnapshot } from '../skills/types';
 
 // =============================================================================
 // Worker Configuration
@@ -87,6 +88,8 @@ export interface SerializableSessionConfig {
      * aren't transferable across worker boundaries, so we serialize to arrays.
      */
     securityProfile?: SerializedSecurityProfile;
+    /** Resolved project skills. Plain JSON, safe to post to the worker. */
+    skillsSnapshot?: SkillsSnapshot;
   };
 }
 

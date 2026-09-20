@@ -93,7 +93,7 @@ export interface SubagentExecutorConfig {
   /** Base tool context (cwd, projectDir, specDir, securityProfile) */
   baseToolContext: ToolContext;
   /** Function to load and assemble a system prompt for a given prompt name */
-  loadPrompt: (promptName: string) => Promise<string>;
+  loadPrompt: (promptName: string, agentType?: string) => Promise<string>;
   /** Abort signal from the parent orchestrator */
   abortSignal?: AbortSignal;
   /** Optional callback for subagent stream events */
@@ -123,12 +123,13 @@ export class SubagentExecutorImpl implements SubagentExecutor {
 
     try {
       // 1. Load system prompt for the subagent
-      const systemPrompt = await this.config.loadPrompt(promptName);
+      const systemPrompt = await this.config.loadPrompt(promptName, agentType);
 
       // 2. Build tool set — exclude SpawnSubagent to prevent recursion
       const subagentToolContext: ToolContext = {
         ...this.config.baseToolContext,
         abortSignal: this.config.abortSignal,
+        agentType,
       };
 
       const tools: Record<string, AITool> = {};

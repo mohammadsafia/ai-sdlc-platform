@@ -45,6 +45,7 @@ import type { ExecutionPhase } from '../../../shared/constants/phase-protocol';
 import { getPhaseThinking } from '../config/phase-config';
 import { TaskLogWriter } from '../logging/task-log-writer';
 import { loadProjectInstructions, injectContext } from '../prompts/prompt-loader';
+import { buildSkillsSectionForAgent, resolveEffectiveAgentType } from './skills-prompt';
 import { createMcpClientsForAgent, mergeMcpTools, closeAllMcpClients } from '../mcp/client';
 import type { McpClientResult } from '../mcp/types';
 import { runProjectIndexer } from '../project/project-indexer';
@@ -155,6 +156,8 @@ function buildToolContext(session: SerializableSessionConfig, securityProfile: S
     specDir: session.toolContext.specDir,
     securityProfile,
     abortSignal: abortController.signal,
+    skillsSnapshot: session.toolContext.skillsSnapshot,
+    agentType: session.agentType,
   };
 }
 
@@ -210,6 +213,7 @@ let cachedProjectInstructionsSource: string | null = null;
 async function assemblePrompt(
   promptName: string,
   session: SerializableSessionConfig,
+  agentType?: string,
 ): Promise<string> {
   const basePrompt = loadPrompt(promptName)
     ?? buildFallbackPrompt(promptName as AgentType, session.specDir, session.projectDir);
@@ -226,10 +230,21 @@ async function assemblePrompt(
     }
   }
 
+  const effectiveAgentType = resolveEffectiveAgentType(promptName, session.agentType, agentType);
+  const skillsSection = await buildSkillsSectionForAgent(
+    session.toolContext.skillsSnapshot,
+    effectiveAgentType,
+    session.specDir,
+  );
+  if (skillsSection) {
+    postLog(`Project skills injected for ${effectiveAgentType} (${(skillsSection.length / 1024).toFixed(1)}KB)`);
+  }
+
   return injectContext(basePrompt, {
     specDir: session.specDir,
     projectDir: session.projectDir,
     projectInstructions: cachedProjectInstructions,
+    skillsSection,
   });
 }
 
@@ -568,7 +583,7 @@ async function runBuildOrchestrator(
 
     generatePrompt: async (agentType, _phase, context) => {
       const promptName = agentType === 'coder' ? 'coder' : agentType;
-      let prompt = await assemblePrompt(promptName, session);
+      let prompt = await assemblePrompt(promptName, session, agentType);
 
       // Inject schema validation error feedback on retry so the planner knows what to fix
       if (context.planningRetryContext) {
@@ -751,7 +766,7 @@ async function runQALoop(
 
     generatePrompt: async (agentType, _context) => {
       const promptName = agentType === 'qa_fixer' ? 'qa_fixer' : 'qa_reviewer';
-      return assemblePrompt(promptName, session);
+      return assemblePrompt(promptName, session, agentType);
     },
 
     runSession: async (runConfig) => {
@@ -856,9 +871,9 @@ async function runSpecOrchestrator(
     projectIndex: projectIndexContent,
     abortSignal: abortController.signal,
 
-    generatePrompt: async (_agentType, phase, context) => {
+    generatePrompt: async (agentType, phase, context) => {
       const promptName = specPhaseToPromptName(phase);
-      let prompt = await assemblePrompt(promptName, session);
+      let prompt = await assemblePrompt(promptName, session, agentType);
 
       // Inject schema validation error feedback on retry so the agent knows what to fix
       if (context.schemaRetryContext) {
@@ -1024,7 +1039,7 @@ async function runAgenticSpecOrchestrator(
       ...toolContext,
       allowedWritePaths: [session.specDir],
     },
-    loadPrompt: async (promptName: string) => assemblePrompt(promptName, session),
+    loadPrompt: async (promptName: string, agentType?: string) => assemblePrompt(promptName, session, agentType),
     abortSignal: abortController.signal,
     onSubagentEvent: (agentType: string, event: string) => {
       postLog(`Subagent ${agentType}: ${event}`);
