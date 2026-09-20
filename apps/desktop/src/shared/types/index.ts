@@ -27,3 +27,4 @@ export * from './provider-account';
 export * from './ipc';
 export * from './skills';
 export * from './brd';
+export * from './requirements';

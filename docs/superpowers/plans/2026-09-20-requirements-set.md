@@ -59,8 +59,8 @@ Modified: `src/shared/constants/ipc.ts`, `src/shared/types/ipc.ts`, `src/shared/
 ```ts
 // apps/desktop/src/shared/types/requirements.ts
 export type RequirementsStatus = 'draft' | 'approved';
-export type TaskCategory = 'feature' | 'bug' | 'refactor' | 'docs';
-export const TASK_CATEGORIES: readonly TaskCategory[] = ['feature', 'bug', 'refactor', 'docs'];
+export type ProposedTaskCategory = 'feature' | 'bug' | 'refactor' | 'docs';
+export const PROPOSED_TASK_CATEGORIES: readonly ProposedTaskCategory[] = ['feature', 'bug', 'refactor', 'docs'];
 
 export interface Requirement {
   id: string;
@@ -86,7 +86,7 @@ export interface ProposedTask {
   description: string;
   milestoneId: string;
   requirementIds: string[];
-  category: TaskCategory;
+  category: ProposedTaskCategory;
   order: number;
   included: boolean;
 }
@@ -297,7 +297,7 @@ The renderer cannot use `node:crypto`, so `brdHash` lives in `src/main/brd/requi
 import { z } from 'zod';
 
 import {
-  TASK_CATEGORIES,
+  PROPOSED_TASK_CATEGORIES,
   type GeneratedBody,
   type Milestone,
   type ProposedTask,
@@ -329,7 +329,7 @@ const taskBody = z.object({
   description: z.string(),
   milestoneId: z.string().min(1),
   requirementIds: z.array(z.string()),
-  category: z.enum(TASK_CATEGORIES as [string, ...string[]]),
+  category: z.enum(PROPOSED_TASK_CATEGORIES as [string, ...string[]]),
   order: z.number().int().positive(),
 });
 
@@ -525,7 +525,7 @@ export function diffSets(a: RequirementsSet, b: RequirementsSet): SectionDiff {
 - [ ] **Step 5: Run tests to verify they pass**
 
 Run: `cd apps/desktop && npx vitest run src/shared/brd/__tests__/requirements.test.ts && npm run typecheck`
-Expected: PASS (10 tests); no type errors. If `z.enum(TASK_CATEGORIES as [string, ...string[]])` complains under the installed Zod, use `z.enum(['feature', 'bug', 'refactor', 'docs'])` directly.
+Expected: PASS (10 tests); no type errors. If `z.enum(PROPOSED_TASK_CATEGORIES as [string, ...string[]])` complains under the installed Zod, use `z.enum(['feature', 'bug', 'refactor', 'docs'])` directly.
 
 - [ ] **Step 6: Commit**
 
@@ -1986,7 +1986,7 @@ export function RequirementsAssist({ projectId }: { projectId: string }) {
 import { useTranslation } from 'react-i18next';
 import { ArrowDown, ArrowUp, Plus, X } from 'lucide-react';
 
-import { TASK_CATEGORIES, type Milestone, type ProposedTask, type Requirement } from '../../../../shared/types/requirements';
+import { PROPOSED_TASK_CATEGORIES, type Milestone, type ProposedTask, type Requirement } from '../../../../shared/types/requirements';
 import { Badge } from '../../ui/badge';
 import { Button } from '../../ui/button';
 import { Checkbox } from '../../ui/checkbox';
@@ -2075,7 +2075,7 @@ export function RequirementsSetEditor() {
       <div className="grid grid-cols-2 gap-2">
         <Field label={t('set.fields.category')}>
           <select className="w-full rounded-md border border-border bg-background px-2 py-1 text-sm" value={task.category} onChange={(e) => edit('tasks', task.id, { category: e.target.value as ProposedTask['category'] })}>
-            {TASK_CATEGORIES.map((c) => <option key={c} value={c}>{t(`set.category.${c}`)}</option>)}
+            {PROPOSED_TASK_CATEGORIES.map((c) => <option key={c} value={c}>{t(`set.category.${c}`)}</option>)}
           </select>
         </Field>
         <Field label={t('set.fields.milestone')}>
