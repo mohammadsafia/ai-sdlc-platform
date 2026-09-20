@@ -33,7 +33,7 @@ const body = {
   milestones: [{ name: 'm', description: 'd', order: 1 }],
   tasks: [{ title: 't', description: 'd', milestoneId: 'M1', requirementIds: ['R1'], category: 'feature' as const, order: 1 }],
 };
-const tick = () => new Promise((r) => setTimeout(r, 0));
+const tick = () => new Promise((r) => setTimeout(r, 10));
 
 describe('requirements handlers', () => {
   beforeEach(() => {

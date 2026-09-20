@@ -88,7 +88,14 @@ export function registerRequirementsHandlers(getMainWindow: () => BrowserWindow 
     const { model, thinkingLevel } = getActiveProviderFeatureSettings('roadmap');
     const hash = brdHash(brdMarkdown);
 
-    void runRequirementsGenerator(
+    // Defer past the invoke reply so the renderer knows the runId before any event arrives.
+    setTimeout(() => {
+      if (controller.signal.aborted) {
+        activeRuns.delete(key);
+        safeSendToRenderer(getMainWindow, IPC_CHANNELS.REQUIREMENTS_ERROR, { runId, error: 'cancelled' });
+        return;
+      }
+      void runRequirementsGenerator(
       {
         projectDir: project.path,
         mode: request.mode,
@@ -129,6 +136,7 @@ export function registerRequirementsHandlers(getMainWindow: () => BrowserWindow 
         }
       },
     );
+    }, 0);
     return { success: true, data: { runId } };
   });
 

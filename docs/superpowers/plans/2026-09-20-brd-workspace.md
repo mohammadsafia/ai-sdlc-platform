@@ -1180,7 +1180,7 @@ describe('brd handlers', () => {
     });
     const r = (await handlers.get('brd:draft')!({}, 'p1', { mode: 'draft', notes: 'n', title: 'T' })) as { success: boolean; data: { runId: string } };
     expect(r.success).toBe(true);
-    await new Promise((res) => setTimeout(res, 0));
+    await new Promise((res) => setTimeout(res, 10));
     expect(runBrdWriter).toHaveBeenCalledWith(
       expect.objectContaining({ projectDir: '/repo', mode: 'draft', notes: 'n', title: 'T', modelShorthand: 'sonnet', thinkingLevel: 'medium' }),
       expect.any(Function),
@@ -1192,13 +1192,14 @@ describe('brd handlers', () => {
     // a new run is allowed after done
     const r2 = (await handlers.get('brd:draft')!({}, 'p1', { mode: 'draft', notes: 'n' })) as { success: boolean };
     expect(r2.success).toBe(true);
+    await new Promise((res) => setTimeout(res, 10)); // let the deferred run finish so it does not leak into the next test
   });
 
   it('revise reads the existing BRD and passes it to the runner', async () => {
     files.readBrd.mockResolvedValue({ summary: { slug: 'a' }, content: '# Existing' });
     runBrdWriter.mockImplementation(async (_c: unknown, onEvent: (e: unknown) => void) => onEvent({ type: 'done', text: 'x' }));
     await handlers.get('brd:draft')!({}, 'p1', { mode: 'revise', notes: 'fix', slug: 'a' });
-    await new Promise((res) => setTimeout(res, 0));
+    await new Promise((res) => setTimeout(res, 10));
     expect(runBrdWriter).toHaveBeenCalledWith(expect.objectContaining({ mode: 'revise', existing: '# Existing' }), expect.any(Function));
   });
 
@@ -1214,8 +1215,8 @@ describe('brd handlers', () => {
     const second = await handlers.get('brd:draft')!({}, 'p1', { mode: 'draft', notes: 'n' });
     expect(second).toEqual({ success: false, error: 'A draft is already running for this project' });
     expect(await handlers.get('brd:draft-cancel')!({}, first.data.runId)).toEqual({ success: true });
-    await new Promise((res) => setTimeout(res, 0));
-    expect(sent.at(-1)).toEqual(['brd:draft-error', { runId: first.data.runId, error: 'aborted' }]);
+    await new Promise((res) => setTimeout(res, 10));
+    expect(sent.at(-1)).toEqual(['brd:draft-error', { runId: first.data.runId, error: 'cancelled' }]);
     expect(await handlers.get('brd:draft-cancel')!({}, 'unknown')).toEqual({ success: false, error: 'No running draft with id unknown' });
     release();
   });
@@ -1288,7 +1289,14 @@ export function registerBrdHandlers(getMainWindow: () => BrowserWindow | null): 
     activeRuns.set(projectId, { runId, projectId, controller });
     const { model, thinkingLevel } = getActiveProviderFeatureSettings('roadmap');
 
-    void runBrdWriter(
+    // Defer past the invoke reply so the renderer knows the runId before any event arrives.
+    setTimeout(() => {
+      if (controller.signal.aborted) {
+        activeRuns.delete(projectId);
+        safeSendToRenderer(getMainWindow, IPC_CHANNELS.BRD_DRAFT_ERROR, { runId, error: 'cancelled' });
+        return;
+      }
+      void runBrdWriter(
       {
         projectDir: project.path,
         mode: request.mode,
@@ -1312,6 +1320,7 @@ export function registerBrdHandlers(getMainWindow: () => BrowserWindow | null): 
         }
       },
     );
+    }, 0);
 
     return { success: true, data: { runId } };
   });

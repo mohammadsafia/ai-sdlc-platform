@@ -56,7 +56,14 @@ export function registerBrdHandlers(getMainWindow: () => BrowserWindow | null): 
     activeRuns.set(projectId, { runId, projectId, controller });
     const { model, thinkingLevel } = getActiveProviderFeatureSettings('roadmap');
 
-    void runBrdWriter(
+    // Defer past the invoke reply so the renderer knows the runId before any event arrives.
+    setTimeout(() => {
+      if (controller.signal.aborted) {
+        activeRuns.delete(projectId);
+        safeSendToRenderer(getMainWindow, IPC_CHANNELS.BRD_DRAFT_ERROR, { runId, error: 'cancelled' });
+        return;
+      }
+      void runBrdWriter(
       {
         projectDir: project.path,
         mode: request.mode,
@@ -80,6 +87,7 @@ export function registerBrdHandlers(getMainWindow: () => BrowserWindow | null): 
         }
       },
     );
+    }, 0);
 
     return { success: true, data: { runId } };
   });
