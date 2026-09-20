@@ -353,5 +353,12 @@
   "referenceImages": {
     "title": "Images de référence (facultatif)",
     "description": "Ajoutez des références visuelles comme des captures d'écran ou des conceptions pour aider l'IA à comprendre vos exigences."
+  },
+  "skillsUsed": {
+    "title": "Compétences utilisées",
+    "empty": "Aucune compétence n'a encore été chargée pour cette tâche.",
+    "pinned": "épinglée",
+    "loaded": "chargée",
+    "resource": "fichier"
   }
 }

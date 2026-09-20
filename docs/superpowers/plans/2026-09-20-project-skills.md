@@ -3441,7 +3441,7 @@ export function TaskSkillsUsed({ task }: TaskSkillsUsedProps) {
               ))}
               {row.resources.map((r) => (
                 <span key={r} className="text-xs text-muted-foreground">
-                  {t('tasks:skillsUsed.resource')}: {r}
+                  {t('tasks:skillsUsed.resource')}: <span className="font-mono">{r}</span>
                 </span>
               ))}
             </li>

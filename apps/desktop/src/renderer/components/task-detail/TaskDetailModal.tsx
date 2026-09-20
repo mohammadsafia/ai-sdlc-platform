@@ -42,6 +42,7 @@ import { TaskWarnings } from './TaskWarnings';
 import { TaskSubtasks } from './TaskSubtasks';
 import { TaskLogs } from './TaskLogs';
 import { TaskFiles } from './TaskFiles';
+import { TaskSkillsUsed } from './TaskSkillsUsed';
 import { TaskReview } from './TaskReview';
 import type { Task, WorktreeCreatePROptions } from '../../../shared/types';
 
@@ -584,8 +585,11 @@ function TaskDetailModalContent({ open, task, onOpenChange, onSwitchToTerminals,
 
                 {/* Files Tab */}
                 {showFilesTab && (
-                  <TabsContent value="files" className="flex-1 min-h-0 overflow-hidden mt-0">
-                    <TaskFiles task={task} />
+                  <TabsContent value="files" className="flex-1 min-h-0 overflow-hidden mt-0 flex flex-col">
+                    <TaskSkillsUsed task={task} />
+                    <div className="flex-1 min-h-0">
+                      <TaskFiles task={task} />
+                    </div>
                   </TabsContent>
                 )}
               </Tabs>
