@@ -1931,7 +1931,7 @@ import { BrdEditor } from '../BrdEditor';
 import { useBrdStore } from '../../../stores/brd-store';
 
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (k: string, o?: Record<string, unknown>) => (o?.error ? `${k}:${o.error}` : k) }),
+  useTranslation: () => ({ t: (k: string, o?: Record<string, unknown>) => (o?.error ? `${k}:${o.error}` : k), i18n: { language: 'en' } }),
 }));
 vi.mock('react-markdown', () => ({ default: ({ children }: { children: string }) => <div data-testid="preview">{children}</div> }));
 vi.mock('remark-gfm', () => ({ default: () => null }));
@@ -2000,7 +2000,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { RequirementsView } from '../RequirementsView';
 import { useBrdStore } from '../../../stores/brd-store';
 
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }));
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k, i18n: { language: 'en' } }) }));
 vi.mock('react-markdown', () => ({ default: ({ children }: { children: string }) => <div>{children}</div> }));
 vi.mock('remark-gfm', () => ({ default: () => null }));
 
@@ -2008,9 +2008,9 @@ const api = {
   brdList: vi.fn(),
   brdRead: vi.fn(),
   brdCreate: vi.fn(),
-  onBrdDraftChunk: vi.fn(() => () => {}),
-  onBrdDraftDone: vi.fn(() => () => {}),
-  onBrdDraftError: vi.fn(() => () => {}),
+  onBrdDraftChunk: vi.fn(() => () => undefined),
+  onBrdDraftDone: vi.fn(() => () => undefined),
+  onBrdDraftError: vi.fn(() => () => undefined),
 };
 const doc = '---\ntitle: A\nstatus: draft\ncreated: 2026-09-20\n---\n# A\n';
 
@@ -2087,7 +2087,12 @@ export function StructureChecklist({ result }: { result: BrdStructureResult | nu
               <Icon className="h-3.5 w-3.5 shrink-0" />
               <span className="truncate">{s.heading}</span>
               {!s.required && <span className="text-muted-foreground">({t('structure.optional')})</span>}
-              {!good && s.required && <span>· {s.present ? t('structure.emptySection') : t('structure.missing')}</span>}
+              {!good && s.required && (
+                <span className="flex items-center gap-1">
+                  <span aria-hidden="true">·</span>
+                  <span>{s.present ? t('structure.emptySection') : t('structure.missing')}</span>
+                </span>
+              )}
             </li>
           );
         })}
@@ -2237,9 +2242,9 @@ export function BrdEditor({ projectId }: { projectId: string }) {
           onChange={(e) => setContent(e.target.value)}
           spellCheck={false}
         />
-        <div className="h-full overflow-auto rounded-md border border-border p-3 prose prose-sm dark:prose-invert max-w-none" aria-label={t('editor.preview')}>
+        <section className="h-full overflow-auto rounded-md border border-border p-3 prose prose-sm dark:prose-invert max-w-none" aria-label={t('editor.preview')}>
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
-        </div>
+        </section>
       </div>
 
       <BrdAssistPanel projectId={projectId} documentIsEmpty={documentIsEmpty(structure)} />
