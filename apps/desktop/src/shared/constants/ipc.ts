@@ -14,6 +14,17 @@ export const IPC_CHANNELS = {
   // Project skills
   SKILLS_LIST: 'skills:list',
   SKILLS_REFRESH: 'skills:refresh',
+
+  // BRD workspace
+  BRD_LIST: 'brd:list',
+  BRD_READ: 'brd:read',
+  BRD_WRITE: 'brd:write',
+  BRD_CREATE: 'brd:create',
+  BRD_DRAFT: 'brd:draft',
+  BRD_DRAFT_CANCEL: 'brd:draft-cancel',
+  BRD_DRAFT_CHUNK: 'brd:draft-chunk',
+  BRD_DRAFT_DONE: 'brd:draft-done',
+  BRD_DRAFT_ERROR: 'brd:draft-error',
   PROJECT_CHECK_VERSION: 'project:checkVersion',
 
   // Tab state operations (persisted in main process)

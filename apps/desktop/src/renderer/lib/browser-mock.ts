@@ -229,6 +229,15 @@ const browserMockAPI: ElectronAPI = {
   // Codex OAuth authentication (mock)
   listSkills: async () => ({ success: true, data: { skills: [], pins: {}, warnings: [], lock: { repos: {} } } }),
   refreshSkills: async () => ({ success: true, data: { skills: [], pins: {}, warnings: [], lock: { repos: {} } } }),
+  brdList: async () => ({ success: true, data: [] }),
+  brdRead: async () => ({ success: false, error: 'Not available in browser mock' }),
+  brdWrite: async () => ({ success: false, error: 'Not available in browser mock' }),
+  brdCreate: async () => ({ success: false, error: 'Not available in browser mock' }),
+  brdDraft: async () => ({ success: false, error: 'Not available in browser mock' }),
+  brdDraftCancel: async () => ({ success: false, error: 'Not available in browser mock' }),
+  onBrdDraftChunk: () => () => {},
+  onBrdDraftDone: () => () => {},
+  onBrdDraftError: () => () => {},
   codexAuthLogin: async () => ({
     success: false,
     error: 'Codex OAuth not available in browser mock'

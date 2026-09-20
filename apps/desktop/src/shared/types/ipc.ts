@@ -107,6 +107,7 @@ import type {
   InsightsStreamChunk,
   InsightsModelConfig
 } from './insights';
+import type { BrdDraftChunk, BrdDraftDone, BrdDraftError, BrdDraftRequest, BrdSummary } from './brd';
 import type {
   CompetitorAnalysis,
   Roadmap,
@@ -816,6 +817,17 @@ export interface ElectronAPI {
   onInsightsSessionUpdated: (
     callback: (projectId: string, session: InsightsSession) => void
   ) => () => void;
+
+  // BRD workspace
+  brdList: (projectId: string) => Promise<IPCResult<BrdSummary[]>>;
+  brdRead: (projectId: string, slug: string) => Promise<IPCResult<{ summary: BrdSummary; content: string }>>;
+  brdWrite: (projectId: string, slug: string, content: string) => Promise<IPCResult<BrdSummary>>;
+  brdCreate: (projectId: string, title: string) => Promise<IPCResult<BrdSummary>>;
+  brdDraft: (projectId: string, request: BrdDraftRequest) => Promise<IPCResult<{ runId: string }>>;
+  brdDraftCancel: (runId: string) => Promise<IPCResult>;
+  onBrdDraftChunk: (callback: (chunk: BrdDraftChunk) => void) => () => void;
+  onBrdDraftDone: (callback: (done: BrdDraftDone) => void) => () => void;
+  onBrdDraftError: (callback: (error: BrdDraftError) => void) => () => void;
 
   // Task logs operations
   getTaskLogs: (projectId: string, specId: string) => Promise<IPCResult<TaskLogs | null>>;

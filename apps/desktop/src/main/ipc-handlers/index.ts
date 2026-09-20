@@ -25,6 +25,7 @@ import { registerGitlabHandlers } from './gitlab-handlers';
 import { registerIdeationHandlers } from './ideation-handlers';
 import { registerChangelogHandlers } from './changelog-handlers';
 import { registerInsightsHandlers } from './insights-handlers';
+import { registerBrdHandlers } from './brd-handlers';
 import { registerMemoryHandlers } from './memory-handlers';
 import { registerAppUpdateHandlers } from './app-update-handlers';
 import { registerDebugHandlers } from './debug-handlers';
@@ -103,6 +104,7 @@ export function setupIpcHandlers(
 
   // Insights handlers
   registerInsightsHandlers(getMainWindow);
+  registerBrdHandlers(getMainWindow);
 
   // Memory & infrastructure handlers (for LadybugDB)
   registerMemoryHandlers();
