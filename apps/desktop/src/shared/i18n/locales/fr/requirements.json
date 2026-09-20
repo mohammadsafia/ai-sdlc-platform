@@ -53,5 +53,46 @@
     "accept": "Accepter dans l'éditeur",
     "discard": "Rejeter",
     "error": "L'assistant a échoué : {{error}}"
+  },
+  "set": {
+    "tab": "Exigences",
+    "documentTab": "Document",
+    "none": "Aucun ensemble d'exigences pour l'instant.",
+    "generate": "Générer les exigences",
+    "notReady": "Le BRD n'est pas prêt à être découpé :",
+    "running": "Génération…",
+    "phase": { "started": "Interrogation du modèle", "parsing": "Analyse de la réponse", "repairing": "Correction de la réponse" },
+    "cancel": "Annuler",
+    "sections": { "requirements": "Exigences", "milestones": "Jalons", "tasks": "Tâches" },
+    "fields": {
+      "title": "Titre", "description": "Description", "area": "Domaine", "acceptance": "Critères d'acceptation",
+      "addCriterion": "Ajouter un critère", "needsDesign": "Design requis", "included": "Inclus", "select": "Sélectionner pour l'affinage",
+      "name": "Nom", "category": "Catégorie", "milestone": "Jalon", "requirements": "Couvre", "moveUp": "Monter", "moveDown": "Descendre"
+    },
+    "category": { "feature": "Fonctionnalité", "bug": "Bug", "refactor": "Refactorisation", "docs": "Docs" },
+    "status": { "draft": "Brouillon", "approved": "Approuvé" },
+    "warnings": "Avertissements d'intégrité",
+    "stale": "Le BRD a changé depuis la génération de cet ensemble.",
+    "regenerate": "Régénérer depuis le BRD",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "approve": "Approuver",
+    "approving": "Approbation…",
+    "unsaved": "Modifications non enregistrées",
+    "saved": "Enregistré",
+    "assist": {
+      "title": "Affinage IA",
+      "feedbackLabel": "Retour",
+      "feedbackPlaceholder": "Que faut-il changer ? Sélectionnez des éléments ci-dessus pour limiter le changement.",
+      "refineSelected": "Affiner la sélection ({{count}})",
+      "refineSet": "Affiner l'ensemble",
+      "proposalTitle": "Modifications proposées",
+      "changeSummary": "Résumé des changements",
+      "counts": "{{added}} ajoutés, {{changed}} modifiés, {{removed}} supprimés",
+      "accept": "Accepter",
+      "discard": "Rejeter",
+      "error": "L'affinage a échoué : {{error}}"
+    },
+    "error": "Une erreur est survenue : {{error}}"
   }
 }

@@ -1674,7 +1674,10 @@ export const useRequirementsStore = create<RequirementsState>((set, get) => {
     ...initial,
 
     isDirty: () => !same(get().set, get().savedSet),
-    isStale: () => !!get().set && get().set!.brdHash !== get().currentBrdHash,
+    isStale: () => {
+      const current = get().set;
+      return !!current && current.brdHash !== get().currentBrdHash;
+    },
     canApprove: () => {
       const { set: s, warnings } = get();
       return !!s && s.status !== 'approved' && !get().isDirty() && warnings.length === 0;
