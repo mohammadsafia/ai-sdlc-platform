@@ -7,6 +7,7 @@ import { LinearIntegration } from '../integrations/LinearIntegration';
 import { GitHubIntegration } from '../integrations/GitHubIntegration';
 import { GitLabIntegration } from '../integrations/GitLabIntegration';
 import { InitializationGuard } from '../common/InitializationGuard';
+import { SkillsSettings } from '../../project-settings/SkillsSettings';
 import type { ProjectSettingsSection } from '../ProjectSettingsContent';
 
 interface SectionRouterProps {
@@ -191,6 +192,16 @@ export function SectionRouter({
               onToggle={() => {}}
             />
           </InitializationGuard>
+        </SettingsSection>
+      );
+
+    case 'skills':
+      return (
+        <SettingsSection
+          title={t('projectSections.skills.integrationTitle')}
+          description={t('projectSections.skills.integrationDescription')}
+        >
+          <SkillsSettings projectId={project.id} />
         </SettingsSection>
       );
 

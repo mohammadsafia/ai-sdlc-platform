@@ -227,6 +227,8 @@ const browserMockAPI: ElectronAPI = {
   }),
 
   // Codex OAuth authentication (mock)
+  listSkills: async () => ({ success: true, data: { skills: [], pins: {}, warnings: [], lock: { repos: {} } } }),
+  refreshSkills: async () => ({ success: true, data: { skills: [], pins: {}, warnings: [], lock: { repos: {} } } }),
   codexAuthLogin: async () => ({
     success: false,
     error: 'Codex OAuth not available in browser mock'

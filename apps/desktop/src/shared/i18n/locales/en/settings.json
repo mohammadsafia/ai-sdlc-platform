@@ -394,6 +394,38 @@
       "integrationDescription": "Connect to GitLab for issue tracking",
       "syncDescription": "Sync with GitLab Issues"
     },
+    "skills": {
+      "title": "Skills",
+      "description": "Agent skills shared with the team",
+      "integrationTitle": "Project Skills",
+      "integrationDescription": "Skills discovered from .claude/skills and central repositories. Read-only; edit .claude/skills.json in the repository to change pins or sources.",
+      "refresh": "Refresh",
+      "refreshing": "Refreshing…",
+      "empty": "No skills found. Add a folder with SKILL.md under .claude/skills/ or declare central repositories in .claude/skills.json.",
+      "blockingError": "Skills configuration error. Pipelines will not start until this is fixed.",
+      "warnings": "Warnings",
+      "columns": {
+        "name": "Name",
+        "description": "Description",
+        "source": "Source",
+        "pinned": "Pinned to",
+        "status": "Status"
+      },
+      "source": {
+        "local": "Local",
+        "central": "Central"
+      },
+      "status": {
+        "active": "Active",
+        "overridden": "Overridden by local"
+      },
+      "repos": {
+        "title": "Central repositories",
+        "commit": "Commit {{commit}} on {{ref}}",
+        "unlocked": "Not resolved yet. Click Refresh and commit .claude/skills.lock.json."
+      },
+      "howTo": "Add a skill: create .claude/skills/<name>/SKILL.md with name and description in its frontmatter. Pin skills or add central repositories in .claude/skills.json."
+    },
     "memory": {
       "title": "Memory",
       "description": "Graphiti memory backend",

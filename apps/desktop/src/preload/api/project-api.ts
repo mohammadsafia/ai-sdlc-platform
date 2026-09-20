@@ -1,6 +1,6 @@
 import { ipcRenderer } from 'electron';
 import { IPC_CHANNELS } from '../../shared/constants';
-import type { SkillsSnapshot } from '../../main/ai/skills/types';
+import type { SkillsSnapshot } from '../../shared/types/skills';
 import type {
   Project,
   ProjectSettings,

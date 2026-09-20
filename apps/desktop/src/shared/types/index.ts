@@ -25,3 +25,4 @@ export * from './provider-account';
 
 // IPC types (must be last to use types from other modules)
 export * from './ipc';
+export * from './skills';

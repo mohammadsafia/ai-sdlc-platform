@@ -3,6 +3,7 @@
  */
 
 import type { IPCResult } from './common';
+import type { SkillsSnapshot } from './skills';
 import type { KanbanPreferences } from './kanban';
 import type { SupportedIDE, SupportedTerminal } from './settings';
 import type {
@@ -185,6 +186,10 @@ export interface ElectronAPI {
   updateProjectSettings: (projectId: string, settings: Partial<ProjectSettings>) => Promise<IPCResult>;
   initializeProject: (projectId: string) => Promise<IPCResult<InitializationResult>>;
   checkProjectVersion: (projectId: string) => Promise<IPCResult<AutoBuildVersionInfo>>;
+
+  // Project skills (read-only)
+  listSkills: (projectId: string) => Promise<IPCResult<SkillsSnapshot>>;
+  refreshSkills: (projectId: string) => Promise<IPCResult<SkillsSnapshot>>;
 
   // Tab State (persisted in main process for reliability)
   getTabState: () => Promise<IPCResult<TabState>>;

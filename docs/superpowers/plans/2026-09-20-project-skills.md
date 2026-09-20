@@ -3043,6 +3043,7 @@ In `apps/desktop/src/shared/i18n/locales/fr/settings.json`, same position:
  * @vitest-environment jsdom
  */
 // apps/desktop/src/renderer/components/project-settings/__tests__/SkillsSettings.test.tsx
+import '@testing-library/jest-dom/vitest';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { SkillsSettings } from '../SkillsSettings';
@@ -3209,7 +3210,8 @@ export function SkillsSettings({ projectId }: SkillsSettingsProps) {
           <ul className="text-muted-foreground">
             {Object.entries(snapshot.lock.repos).map(([url, entry]) => (
               <li key={url} className="break-all">
-                {url} — {t('projectSections.skills.repos.commit', { commit: entry.commit.slice(0, 7), ref: entry.ref })}
+                <span className="font-mono">{url}</span>{' '}
+                <span>{t('projectSections.skills.repos.commit', { commit: entry.commit.slice(0, 7), ref: entry.ref })}</span>
               </li>
             ))}
           </ul>
@@ -3305,6 +3307,7 @@ In `fr/tasks.json`:
  * @vitest-environment jsdom
  */
 // apps/desktop/src/renderer/components/task-detail/__tests__/TaskSkillsUsed.test.tsx
+import '@testing-library/jest-dom/vitest';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { TaskSkillsUsed } from '../TaskSkillsUsed';

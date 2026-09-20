@@ -394,6 +394,38 @@
       "integrationDescription": "Se connecter à GitLab pour le suivi des issues",
       "syncDescription": "Synchroniser avec GitLab Issues"
     },
+    "skills": {
+      "title": "Compétences",
+      "description": "Compétences d'agent partagées avec l'équipe",
+      "integrationTitle": "Compétences du projet",
+      "integrationDescription": "Compétences découvertes dans .claude/skills et les dépôts centraux. Lecture seule ; modifiez .claude/skills.json dans le dépôt pour changer les épingles ou les sources.",
+      "refresh": "Actualiser",
+      "refreshing": "Actualisation…",
+      "empty": "Aucune compétence trouvée. Ajoutez un dossier avec SKILL.md sous .claude/skills/ ou déclarez des dépôts centraux dans .claude/skills.json.",
+      "blockingError": "Erreur de configuration des compétences. Les pipelines ne démarreront pas tant que ce n'est pas corrigé.",
+      "warnings": "Avertissements",
+      "columns": {
+        "name": "Nom",
+        "description": "Description",
+        "source": "Source",
+        "pinned": "Épinglée à",
+        "status": "Statut"
+      },
+      "source": {
+        "local": "Locale",
+        "central": "Centrale"
+      },
+      "status": {
+        "active": "Active",
+        "overridden": "Remplacée par la locale"
+      },
+      "repos": {
+        "title": "Dépôts centraux",
+        "commit": "Commit {{commit}} sur {{ref}}",
+        "unlocked": "Pas encore résolu. Cliquez sur Actualiser puis validez .claude/skills.lock.json."
+      },
+      "howTo": "Ajouter une compétence : créez .claude/skills/<nom>/SKILL.md avec name et description dans son en-tête. Épinglez des compétences ou ajoutez des dépôts centraux dans .claude/skills.json."
+    },
     "memory": {
       "title": "Mémoire",
       "description": "Backend mémoire Graphiti",
