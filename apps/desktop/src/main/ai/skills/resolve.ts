@@ -74,7 +74,7 @@ async function resolveWithLock(
     } catch (err) {
       return errorSnapshot(err instanceof Error ? err.message : String(err), lock);
     }
-    const found = await discoverSkills(root, 'central', { repoUrl: repo.url, commit: entry.commit });
+    const found = await discoverSkills(root, 'central', { repoUrl: repo.url, commit: entry.commit }, { only: repo.include });
     warnings.push(...found.warnings.map((w) => `${repo.url}: ${w}`));
     central.push({ repo, skills: found.skills });
   }

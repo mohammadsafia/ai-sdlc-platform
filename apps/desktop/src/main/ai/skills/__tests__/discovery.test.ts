@@ -79,6 +79,15 @@ describe('discoverSkills', () => {
     expect(r.warnings[0]).toContain('long');
   });
 
+  it('with "only", examines just the listed folders and emits no warnings for the rest', async () => {
+    writeSkill(root, 'keep', 'name: keep\ndescription: K');
+    writeSkill(root, 'noisy', `name: noisy\ndescription: ${'x'.repeat(250)}`);
+    writeSkill(root, 'broken', 'name: wrong\ndescription: B');
+    const r = await discoverSkills(root, 'local', {}, { only: ['keep', 'missing'] });
+    expect(r.skills.map((s) => s.name)).toEqual(['keep']);
+    expect(r.warnings).toEqual([]);
+  });
+
   it('follows a symlinked skill folder and records the real path', async () => {
     const real = writeSkill(root, 'real-target', 'name: linked\ndescription: L');
     symlinkSync(real, path.join(root, 'linked'), 'dir');

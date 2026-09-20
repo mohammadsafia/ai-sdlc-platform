@@ -17,6 +17,11 @@ export interface SkillOrigin {
   commit?: string;
 }
 
+export interface DiscoveryOptions {
+  /** When set, only folders with these names are examined (no warnings for others). */
+  only?: readonly string[];
+}
+
 async function isDirectory(p: string): Promise<boolean> {
   try {
     return (await fs.stat(p)).isDirectory();
@@ -33,14 +38,17 @@ export async function discoverSkills(
   dir: string,
   source: SkillSource,
   origin: SkillOrigin = {},
+  options: DiscoveryOptions = {},
 ): Promise<DiscoveryResult> {
   const skills: SkillDefinition[] = [];
   const warnings: string[] = [];
 
   if (!(await isDirectory(dir))) return { skills, warnings };
 
+  const only = options.only ? new Set(options.only) : null;
   const entries = await fs.readdir(dir, { withFileTypes: true });
   for (const entry of entries) {
+    if (only && !only.has(entry.name)) continue;
     const folder = path.join(dir, entry.name);
     if (!(entry.isDirectory() || entry.isSymbolicLink())) continue;
     if (!(await isDirectory(folder))) continue;
