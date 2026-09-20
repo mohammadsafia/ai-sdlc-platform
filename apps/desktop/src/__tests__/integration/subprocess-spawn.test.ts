@@ -45,6 +45,7 @@ vi.mock('../../main/ai/agent/worker-bridge', () => {
 vi.mock('electron', () => ({
   app: {
     getAppPath: vi.fn(() => '/mock/app/path'),
+    getPath: vi.fn(() => '/mock/user-data'),
     isPackaged: false,
   },
   ipcMain: {
