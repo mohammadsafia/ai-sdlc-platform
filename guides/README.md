@@ -1,6 +1,6 @@
-# Auto Claude Guides
+# Appswave Guides
 
-Detailed documentation for Auto Claude setup and usage.
+Detailed documentation for Appswave setup and usage.
 
 ## Available Guides
 

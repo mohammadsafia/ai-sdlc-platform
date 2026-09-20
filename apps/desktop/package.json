@@ -10,7 +10,7 @@
   },
   "main": "./out/main/index.js",
   "author": {
-    "name": "Aperant Team",
+    "name": "Appswave Team",
     "email": "119136210+AndyMik90@users.noreply.github.com"
   },
   "license": "AGPL-3.0",
@@ -159,14 +159,14 @@
   },
   "build": {
     "appId": "com.aperant.app",
-    "productName": "Aperant",
+    "productName": "Appswave",
     "npmRebuild": false,
     "artifactName": "${productName}-${version}-${platform}-${arch}.${ext}",
     "publish": [
       {
         "provider": "github",
-        "owner": "AndyMik90",
-        "repo": "Aperant"
+        "owner": "mohammadsafia",
+        "repo": "ai-sdlc-platform"
       }
     ],
     "directories": {

@@ -259,8 +259,8 @@ export interface TerminalWorktreeResult {
 }
 
 /**
- * Information about a worktree not managed by Auto Claude
- * Discovered via `git worktree list` excluding Auto Claude paths
+ * Information about a worktree not managed by Appswave
+ * Discovered via `git worktree list` excluding Appswave paths
  */
 export interface OtherWorktreeInfo {
   /** Full path to the worktree */

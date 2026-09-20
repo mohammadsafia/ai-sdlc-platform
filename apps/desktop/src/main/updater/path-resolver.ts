@@ -1,5 +1,5 @@
 /**
- * Path resolution utilities for Auto Claude updater
+ * Path resolution utilities for Appswave updater
  */
 
 import { existsSync, readFileSync } from 'fs';

@@ -88,6 +88,7 @@ const BLOCKED_PROCESS_NAMES = new Set([
   'Electron',
   'auto-claude',
   'Aperant',
+  'Appswave',
 ]);
 
 // ---------------------------------------------------------------------------

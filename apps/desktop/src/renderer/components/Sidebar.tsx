@@ -18,8 +18,6 @@ import {
   FileText,
   Sparkles,
   GitBranch,
-  HelpCircle,
-  Heart,
   Wrench,
   PanelLeft,
   PanelLeftClose
@@ -354,7 +352,7 @@ export function Sidebar({
           isCollapsed ? "justify-center px-2" : "px-4"
         )}>
           {!isCollapsed && (
-            <span className="electron-no-drag text-lg font-bold text-primary">Aperant</span>
+            <span className="electron-no-drag text-lg font-bold text-primary">Appswave</span>
           )}
         </div>
 
@@ -435,40 +433,8 @@ export function Sidebar({
               </TooltipTrigger>
               <TooltipContent side={isCollapsed ? "right" : "top"}>{t('tooltips.settings')}</TooltipContent>
             </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => window.open('https://github.com/AndyMik90/Auto-Claude/issues', '_blank')}
-                  aria-label={t('tooltips.help')}
-                >
-                  <HelpCircle className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side={isCollapsed ? "right" : "top"}>{t('tooltips.help')}</TooltipContent>
-            </Tooltip>
           </div>
 
-          {/* Sponsor link */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => window.open('https://github.com/sponsors/AndyMik90', '_blank')}
-                className={cn(
-                  'flex w-full items-center text-xs transition-colors',
-                  'text-amber-500/70 hover:text-amber-400',
-                  isCollapsed ? 'justify-center' : 'gap-1.5 px-3'
-                )}
-              >
-                <Heart className="h-3.5 w-3.5" />
-                {!isCollapsed && <span>{t('actions.sponsor')}</span>}
-              </button>
-            </TooltipTrigger>
-            {isCollapsed && (
-              <TooltipContent side="right">{t('actions.sponsor')}</TooltipContent>
-            )}
-          </Tooltip>
 
           {/* New Task button */}
           <Tooltip>
@@ -495,7 +461,7 @@ export function Sidebar({
         </div>
       </div>
 
-      {/* Initialize Auto Claude Dialog */}
+      {/* Initialize Appswave Dialog */}
       <Dialog open={showInitDialog} onOpenChange={(open) => {
         // Only allow closing if user manually closes (not during initialization)
         if (!open && !isInitializing) {

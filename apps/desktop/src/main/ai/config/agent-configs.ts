@@ -11,7 +11,7 @@
  * - Base tools: Core file operations (Read, Write, Edit, etc.)
  * - Web tools: Documentation and research (WebFetch, WebSearch)
  * - MCP tools: External integrations (Context7, Linear, Memory, etc.)
- * - Auto-Claude tools: Custom build management tools
+ * - Appswave tools: Custom build management tools
  */
 
 import type { ThinkingLevel } from './types';
@@ -36,7 +36,7 @@ const ALL_BUILTIN_TOOLS = [...BASE_READ_TOOLS, ...BASE_WRITE_TOOLS, ...WEB_TOOLS
 const SPEC_TOOLS = [...BASE_READ_TOOLS, 'Write', ...WEB_TOOLS] as const;
 
 // =============================================================================
-// Auto-Claude MCP Tools (Custom build management)
+// Appswave MCP Tools (Custom build management)
 // =============================================================================
 
 const TOOL_UPDATE_SUBTASK_STATUS = 'mcp__auto-claude__update_subtask_status';
@@ -160,7 +160,7 @@ export interface AgentConfig {
   mcpServers: readonly string[];
   /** Optional MCP servers (conditionally enabled) */
   mcpServersOptional?: readonly string[];
-  /** Auto-Claude MCP tools this agent can use */
+  /** Appswave MCP tools this agent can use */
   autoClaudeTools: readonly string[];
   /** Default thinking level for this agent */
   thinkingDefault: ThinkingLevel;

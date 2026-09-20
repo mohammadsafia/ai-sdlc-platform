@@ -23,15 +23,14 @@
     "help": "Help & Feedback",
     "newTask": "New Task",
     "collapseSidebar": "Collapse Sidebar",
-    "expandSidebar": "Expand Sidebar",
-    "sponsor": "Sponsor Us"
+    "expandSidebar": "Expand Sidebar"
   },
   "tooltips": {
     "settings": "Application Settings",
     "help": "Help & Feedback"
   },
   "messages": {
-    "initializeToCreateTasks": "Initialize Aperant to create tasks"
+    "initializeToCreateTasks": "Initialize Appswave to create tasks"
   },
   "updateBanner": {
     "title": "Update Available",

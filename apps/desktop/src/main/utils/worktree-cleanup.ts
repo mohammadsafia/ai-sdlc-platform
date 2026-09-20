@@ -12,7 +12,7 @@
  * 2. Prunes git's internal worktree references
  * 3. Optionally deletes the associated branch
  *
- * Related issue: https://github.com/AndyMik90/Auto-Claude/issues/1539
+ * Related issue: https://github.com/mohammadsafia/ai-sdlc-platform/issues/1539
  */
 
 import { execFileSync } from 'child_process';

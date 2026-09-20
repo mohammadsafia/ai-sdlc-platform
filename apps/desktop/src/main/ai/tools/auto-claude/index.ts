@@ -1,5 +1,5 @@
 /**
- * Auto-Claude Custom Tools
+ * Appswave Custom Tools
  * ========================
  *
  * Barrel export for all auto-claude builtin tools.

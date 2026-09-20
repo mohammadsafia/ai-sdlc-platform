@@ -100,13 +100,13 @@ const PUPPETEER_SERVER: McpServerConfig = {
 };
 
 /**
- * Auto-Claude MCP server - custom build management tools.
+ * Appswave MCP server - custom build management tools.
  * Used by planner, coder, and QA agents for build progress tracking.
  */
 function createAutoClaudeServer(specDir: string): McpServerConfig {
   return {
     id: 'auto-claude',
-    name: 'Aperant',
+    name: 'Appswave',
     description: 'Build management tools (progress tracking, session context)',
     enabledByDefault: true,
     transport: {

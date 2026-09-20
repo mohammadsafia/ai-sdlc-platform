@@ -1,13 +1,13 @@
-# Contributing to Auto Claude
+# Contributing to Appswave
 
-Thank you for your interest in contributing to Auto Claude! This document provides guidelines and instructions for contributing to the project.
+Thank you for your interest in contributing to Appswave! This document provides guidelines and instructions for contributing to the project.
 
 ## How to Contribute
 
 | What you want to do | Where to start |
 |----------------------|----------------|
 | Bug fixes & small improvements | Open a PR directly |
-| New features / architecture changes | Start a [GitHub Discussion](https://github.com/AndyMik90/Auto-Claude/discussions) or ask in [Discord](https://discord.com/channels/1448614759996854284/1451298184612548779) first |
+| New features / architecture changes | Start a [GitHub Discussion](https://github.com/mohammadsafia/ai-sdlc-platform/discussions) or ask in [Discord](https://discord.com/channels/1448614759996854284/1451298184612548779) first |
 | Questions & setup help | [Discord #setup-help](https://discord.com/channels/1448614759996854284/1451298184612548779) |
 
 ## AI-Assisted Contributions
@@ -56,7 +56,7 @@ All contributors must sign our Contributor License Agreement (CLA) before contri
 
 ### Why We Require a CLA
 
-Auto Claude is currently licensed under AGPL-3.0. The CLA ensures the project has proper licensing flexibility should we introduce additional licensing options (such as commercial/enterprise licenses) in the future.
+Appswave is currently licensed under AGPL-3.0. The CLA ensures the project has proper licensing flexibility should we introduce additional licensing options (such as commercial/enterprise licenses) in the future.
 
 You retain full copyright ownership of your contributions.
 
@@ -129,7 +129,7 @@ The fastest way to get started:
 
 ```bash
 # Clone the repository
-git clone https://github.com/AndyMik90/Auto-Claude.git
+git clone https://github.com/mohammadsafia/ai-sdlc-platform.git
 cd Auto-Claude
 
 # Install all dependencies (cross-platform)
@@ -170,7 +170,7 @@ npm test               # Run frontend tests
 <details>
 <summary><b>Windows users:</b> If installation fails with node-gyp errors, click here</summary>
 
-Auto Claude automatically downloads prebuilt binaries for Windows. If prebuilts aren't available for your Electron version yet, you'll need Visual Studio Build Tools:
+Appswave automatically downloads prebuilt binaries for Windows. If prebuilts aren't available for your Electron version yet, you'll need Visual Studio Build Tools:
 
 1. Download [Visual Studio Build Tools 2022](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
 2. Select "Desktop development with C++" workload
@@ -179,7 +179,7 @@ Auto Claude automatically downloads prebuilt binaries for Windows. If prebuilts 
 
 </details>
 
-> **Note:** For regular usage, we recommend downloading the pre-built releases from [GitHub Releases](https://github.com/AndyMik90/Auto-Claude/releases). Running from source is primarily for contributors and those testing unreleased features.
+> **Note:** For regular usage, we recommend downloading the pre-built releases from [GitHub Releases](https://github.com/mohammadsafia/ai-sdlc-platform/releases). Running from source is primarily for contributors and those testing unreleased features.
 
 ## Pre-commit Hooks
 
@@ -323,7 +323,7 @@ We use a **Git Flow** branching strategy to manage releases and parallel develop
 
 ### Working with Forks
 
-When contributing to Auto Claude, you'll typically fork the repository first. Proper fork configuration is essential to avoid sync issues.
+When contributing to Appswave, you'll typically fork the repository first. Proper fork configuration is essential to avoid sync issues.
 
 #### Initial Fork Setup
 
@@ -341,7 +341,7 @@ git remote -v
 # origin  https://github.com/YOUR-USERNAME/Auto-Claude.git (push)
 
 # 4. Add upstream remote to sync with the original repo
-git remote add upstream https://github.com/AndyMik90/Auto-Claude.git
+git remote add upstream https://github.com/mohammadsafia/ai-sdlc-platform.git
 ```
 
 #### Keeping Your Fork Updated
@@ -682,7 +682,7 @@ When reporting a bug, include:
 2. **Environment details**:
    - OS and version
    - Node.js version
-   - Auto Claude version
+   - Appswave version
 3. **Steps to reproduce** the issue
 4. **Expected behavior** vs **actual behavior**
 5. **Error messages** or logs (if applicable)
@@ -699,7 +699,7 @@ When requesting a feature:
 
 ## Architecture Overview
 
-Auto Claude is a single Electron desktop application in `apps/desktop/`.
+Appswave is a single Electron desktop application in `apps/desktop/`.
 
 ### Electron Desktop (`apps/desktop/`)
 
@@ -719,4 +719,4 @@ If you have questions about contributing, feel free to:
 1. Open a GitHub issue with the `question` label
 2. Review existing issues and discussions
 
-Thank you for contributing to Auto Claude!
+Thank you for contributing to Appswave!

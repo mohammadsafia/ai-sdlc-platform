@@ -72,21 +72,26 @@ import { ptyDaemonClient } from './terminal/pty-daemon-client';
 import type { AppSettings, AuthFailureInfo } from '../shared/types';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Migrate userData from old app name (auto-claude-ui → aperant)
+// Migrate userData from previous app names (auto-claude-ui → aperant → Appswave)
 // Must run before any code accesses app.getPath('userData')
 // ─────────────────────────────────────────────────────────────────────────────
 {
   const newUserData = app.getPath('userData');
-  const oldUserData = join(dirname(newUserData), 'auto-claude-ui');
-  if (existsSync(oldUserData) && !existsSync(join(newUserData, '.migrated'))) {
-    try {
-      // Copy all files from old location to new (don't move — keeps old as backup)
-      cpSync(oldUserData, newUserData, { recursive: true, force: false, errorOnExist: false });
-      // Mark as migrated so we don't repeat
-      writeFileSync(join(newUserData, '.migrated'), new Date().toISOString());
-      console.warn('[main] Migrated userData from auto-claude-ui to aperant');
-    } catch (err) {
-      console.warn('[main] userData migration failed (non-fatal):', err);
+  const previousNames = ['Appswave', 'aperant', 'auto-claude-ui'];
+  if (!existsSync(join(newUserData, '.migrated'))) {
+    const oldUserData = previousNames
+      .map((name) => join(dirname(newUserData), name))
+      .find((candidate) => candidate.toLowerCase() !== newUserData.toLowerCase() && existsSync(candidate));
+    if (oldUserData) {
+      try {
+        // Copy all files from old location to new (don't move — keeps old as backup)
+        cpSync(oldUserData, newUserData, { recursive: true, force: false, errorOnExist: false });
+        // Mark as migrated so we don't repeat
+        writeFileSync(join(newUserData, '.migrated'), new Date().toISOString());
+        console.warn(`[main] Migrated userData from ${oldUserData} to ${newUserData}`);
+      } catch (err) {
+        console.warn('[main] userData migration failed (non-fatal):', err);
+      }
     }
   }
 }
@@ -390,10 +395,10 @@ function createWindow(): void {
 }
 
 // Set app name before ready (for dock tooltip on macOS in dev mode)
-app.setName('Aperant');
+app.setName('Appswave');
 if (isMacOS()) {
   // Force the name to appear in dock on macOS
-  app.name = 'Aperant';
+  app.name = 'Appswave';
 }
 
 // Fix Windows GPU cache permission errors (0x5 Access Denied)
