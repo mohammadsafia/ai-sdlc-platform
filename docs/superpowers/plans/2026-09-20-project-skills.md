@@ -1383,7 +1383,7 @@ describe('sync', () => {
     const dir = await ensureCheckout(deps, url, 'abc123');
     expect(dir).toBe(checkoutDir(deps, url, 'abc123'));
     expect(calls.map((c) => c.args)).toEqual([
-      ['clone', '--mirror', url, mirrorDir(deps, url)],
+      ['clone', '--mirror', '--filter=blob:none', url, mirrorDir(deps, url)],
       ['--git-dir', mirrorDir(deps, url), 'cat-file', '-e', 'abc123^{commit}'],
       ['--git-dir', mirrorDir(deps, url), 'worktree', 'add', '--detach', dir, 'abc123'],
     ]);
@@ -1414,7 +1414,7 @@ describe('sync', () => {
     const deps: SyncDeps = { git, baseDir };
     const r = await refreshRepo(deps, { url, ref: 'release', subpath: 'skills' });
     expect(r).toEqual({ ref: 'release', commit: 'deadbeef' });
-    expect(calls[0].args).toEqual(['clone', '--mirror', url, mirrorDir(deps, url)]);
+    expect(calls[0].args).toEqual(['clone', '--mirror', '--filter=blob:none', url, mirrorDir(deps, url)]);
     expect(calls[1].args).toEqual(['--git-dir', mirrorDir(deps, url), 'rev-parse', '--verify', 'release^{commit}']);
     expect(existsSync(path.join(baseDir, 'skill-repos'))).toBe(true);
   });
@@ -1525,7 +1525,9 @@ async function ensureMirror(deps: SyncDeps, url: string): Promise<{ mirror: stri
   if (await exists(mirror)) return { mirror, created: false };
   await fs.mkdir(path.dirname(mirror), { recursive: true });
   try {
-    await deps.git(['clone', '--mirror', url, mirror]);
+    // Blobless partial clone: refs + trees only. Blobs are fetched lazily when a
+    // commit is checked out, which keeps large public skill collections fast.
+    await deps.git(['clone', '--mirror', '--filter=blob:none', url, mirror]);
   } catch (err) {
     throw wrap(url, 'clone', err);
   }

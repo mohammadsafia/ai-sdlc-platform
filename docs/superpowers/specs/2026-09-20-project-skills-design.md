@@ -186,7 +186,7 @@ skill-repos/<sha256(url)>/mirror/      # bare mirror clone
 skill-repos/<sha256(url)>/<commit>/    # immutable checkout, one per locked commit
 ```
 
-- **Ensure** (called by resolution): if `<commit>/` exists, done. Else, if `mirror/` is missing, `git clone --mirror`. Then `git --git-dir=mirror worktree add --detach <commit>/ <commit>`. If the commit is absent from the mirror, fetch first. The checkout is never written to again.
+- **Ensure** (called by resolution): if `<commit>/` exists, done. Else, if `mirror/` is missing, `git clone --mirror --filter=blob:none` (a blobless partial clone; blobs are fetched lazily at checkout, which keeps large public collections such as `anthropics/skills` to seconds instead of minutes). Then `git --git-dir=mirror worktree add --detach <commit>/ <commit>`. If the commit is absent from the mirror, fetch first. The checkout is never written to again.
 - **Refresh** (panel button): `git fetch` the mirror, `git rev-parse <ref>` to resolve the commit, write `skills.lock.json`, ensure the checkout. Old checkouts are not pruned in this version.
 - Git binary via `platform/findExecutable('git')`; arguments as arrays, never a shell string; credentials come from the user's existing git setup. URL scheme must be `https://` or ssh (`ssh://` or `git@host:`). Fetch and clone have a 120 s timeout and are cancellable.
 - Offline: existing checkout works. Missing checkout offline → snapshot `error`.

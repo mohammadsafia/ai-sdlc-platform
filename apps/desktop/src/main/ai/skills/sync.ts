@@ -70,7 +70,9 @@ async function ensureMirror(deps: SyncDeps, url: string): Promise<{ mirror: stri
   if (await exists(mirror)) return { mirror, created: false };
   await fs.mkdir(path.dirname(mirror), { recursive: true });
   try {
-    await deps.git(['clone', '--mirror', url, mirror]);
+    // Blobless partial clone: refs + trees only. Blobs are fetched lazily when a
+    // commit is checked out, which keeps large public skill collections fast.
+    await deps.git(['clone', '--mirror', '--filter=blob:none', url, mirror]);
   } catch (err) {
     throw wrap(url, 'clone', err);
   }
