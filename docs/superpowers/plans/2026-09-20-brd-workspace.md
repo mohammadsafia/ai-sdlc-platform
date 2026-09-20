@@ -581,7 +581,7 @@ Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
 ```ts
 // apps/desktop/src/main/brd/__tests__/brd-files.test.ts
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readdirSync, symlinkSync, existsSync } from 'fs';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readdirSync, symlinkSync, existsSync, realpathSync } from 'fs';
 import { tmpdir } from 'os';
 import path from 'path';
 import { brdPath, listBrds, readBrd, writeBrd, createBrd } from '../brd-files';
@@ -601,7 +601,7 @@ describe('brd-files', () => {
   });
 
   it('brdPath validates the slug and stays inside docs/brd', async () => {
-    expect(await brdPath(projectDir, 'my-brd')).toBe(path.join(brdDir, 'my-brd.md'));
+    expect(await brdPath(projectDir, 'my-brd')).toBe(path.join(realpathSync(projectDir), 'docs', 'brd', 'my-brd.md'));
     await expect(brdPath(projectDir, '../x')).rejects.toThrow(/Invalid BRD slug/);
     await expect(brdPath(projectDir, 'Upper')).rejects.toThrow(/Invalid BRD slug/);
     await expect(brdPath(projectDir, '')).rejects.toThrow(/Invalid BRD slug/);
@@ -622,6 +622,7 @@ describe('brd-files', () => {
   it('listBrds reads frontmatter, warns on missing title, ignores non-md, sorts by modifiedAt desc', async () => {
     mkdirSync(brdDir, { recursive: true });
     writeFileSync(path.join(brdDir, 'older.md'), doc('Older'));
+    await new Promise((r) => setTimeout(r, 20));
     writeFileSync(path.join(brdDir, 'notes.txt'), 'ignored');
     writeFileSync(path.join(brdDir, 'untitled.md'), '# no frontmatter');
     await new Promise((r) => setTimeout(r, 20));
@@ -629,7 +630,7 @@ describe('brd-files', () => {
     const list = await listBrds(projectDir);
     expect(list.map((b) => b.slug)).toEqual(['newer', 'untitled', 'older']);
     expect(list[0]).toMatchObject({ title: 'Newer', status: 'review', created: '2026-09-01' });
-    expect(list[1]).toMatchObject({ title: 'untitled', warning: expect.stringContaining('title') });
+    expect(list[1]).toMatchObject({ title: 'untitled', warning: expect.stringContaining('Frontmatter') });
   });
 
   it('readBrd returns summary and content; missing file errors', async () => {
