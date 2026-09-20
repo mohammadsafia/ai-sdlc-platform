@@ -2202,6 +2202,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Save } from 'lucide-react';
 
+import { parseFrontmatter } from '../../../shared/frontmatter';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { useBrdStore } from '../../stores/brd-store';
@@ -2248,7 +2249,7 @@ export function BrdEditor({ projectId }: { projectId: string }) {
           spellCheck={false}
         />
         <section className="h-full overflow-auto rounded-md border border-border p-3 prose prose-sm dark:prose-invert max-w-none" aria-label={t('editor.preview')}>
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{parseFrontmatter(content)?.body ?? content}</ReactMarkdown>
         </section>
       </div>
 
