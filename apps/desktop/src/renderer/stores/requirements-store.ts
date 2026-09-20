@@ -29,6 +29,8 @@ interface RequirementsState {
   canApprove: () => boolean;
   reset: () => void;
   load: (projectId: string, slug: string) => Promise<void>;
+  /** Re-read the BRD hash after the document was saved, keeping the set and any local edits. */
+  refreshBrdHash: (projectId: string) => Promise<void>;
   edit: <S extends Section>(section: S, id: string, patch: Partial<ItemOf<S>>) => void;
   toggleInclude: (section: Section, id: string) => void;
   toggleSelect: (id: string) => void;
@@ -100,6 +102,13 @@ export const useRequirementsStore = create<RequirementsState>((set, get) => {
       }
       const { set: loaded, currentBrdHash } = result.data;
       set({ set: loaded, savedSet: loaded, currentBrdHash, warnings: loaded ? validateRequirementsSet(loaded) : [], isLoading: false });
+    },
+
+    refreshBrdHash: async (projectId) => {
+      const { slug } = get();
+      if (!slug) return;
+      const result = await window.electronAPI.requirementsRead(projectId, slug);
+      if (result.success && result.data) set({ currentBrdHash: result.data.currentBrdHash });
     },
 
     edit: (section, id, patch) =>

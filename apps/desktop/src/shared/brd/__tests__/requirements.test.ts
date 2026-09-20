@@ -1,5 +1,6 @@
 // apps/desktop/src/shared/brd/__tests__/requirements.test.ts
 import { describe, it, expect } from 'vitest';
+import { z } from 'zod';
 import {
   GeneratedBodySchema, RequirementsSetSchema, validateRequirementsSet, nextId, assignIds, mergeRefinement, diffSets,
 } from '../requirements';
@@ -34,6 +35,24 @@ describe('schemas', () => {
       tasks: [{ title: 't', description: 'd', milestoneId: 'M1', requirementIds: ['R1'], category: 'docs', order: 1 }],
     };
     expect(GeneratedBodySchema.safeParse(body).success).toBe(true);
+  });
+});
+
+describe('model-facing schema', () => {
+  it('emits no numeric constraints, which Anthropic structured outputs reject', () => {
+    const json = JSON.stringify(z.toJSONSchema(GeneratedBodySchema));
+    expect(json).not.toMatch(/exclusiveMinimum|exclusiveMaximum|"minimum"|"maximum"|"integer"/);
+  });
+
+  it('assignIds normalizes order to a positive integer', () => {
+    const body: GeneratedBody = {
+      requirements: [],
+      milestones: [{ name: 'a', description: 'd', order: 0 }, { name: 'b', description: 'd', order: 2.4 }],
+      tasks: [{ title: 't', description: 'd', milestoneId: 'M1', requirementIds: [], category: 'feature', order: -3 }],
+    };
+    const out = assignIds(body);
+    expect(out.milestones.map((m) => m.order)).toEqual([1, 2]);
+    expect(out.tasks[0].order).toBe(1);
   });
 });
 

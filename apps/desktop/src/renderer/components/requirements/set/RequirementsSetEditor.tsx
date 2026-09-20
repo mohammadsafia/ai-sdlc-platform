@@ -13,10 +13,11 @@ import { useRequirementsStore } from '../../../stores/requirements-store';
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="text-xs">
+    // biome-ignore lint/a11y/noLabelWithoutControl: children is always a native input, textarea, or select, so wrapping it names the control
+    <label className="block text-xs">
       <span className="mb-1 block font-medium text-muted-foreground">{label}</span>
       {children}
-    </div>
+    </label>
   );
 }
 

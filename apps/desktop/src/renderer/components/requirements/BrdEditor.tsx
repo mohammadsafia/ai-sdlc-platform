@@ -49,7 +49,14 @@ export function BrdEditor({ projectId }: { projectId: string }) {
             {error && <span className="text-destructive">{t('editor.saveError', { error })}</span>}
           </div>
         </div>
-        <Button size="sm" disabled={!dirty || isSaving} onClick={() => void save(projectId)}>
+        <Button
+          size="sm"
+          disabled={!dirty || isSaving}
+          onClick={async () => {
+            await save(projectId);
+            void useRequirementsStore.getState().refreshBrdHash(projectId);
+          }}
+        >
           <Save className="mr-2 h-4 w-4" />
           {isSaving ? t('editor.saving') : t('editor.save')}
         </Button>

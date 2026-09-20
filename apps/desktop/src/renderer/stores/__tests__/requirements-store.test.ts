@@ -99,6 +99,19 @@ describe('requirements-store', () => {
     stop();
   });
 
+  it('refreshBrdHash updates only the BRD hash and keeps local edits', async () => {
+    api.requirementsRead.mockResolvedValue({ success: true, data: { set, currentBrdHash: 'H' } });
+    await useRequirementsStore.getState().load('p1', 'a');
+    useRequirementsStore.getState().edit('requirements', 'R1', { title: 'changed' });
+    api.requirementsRead.mockResolvedValue({ success: true, data: { set, currentBrdHash: 'H2' } });
+    await useRequirementsStore.getState().refreshBrdHash('p1');
+    const s = useRequirementsStore.getState();
+    expect(s.currentBrdHash).toBe('H2');
+    expect(s.isStale()).toBe(true);
+    expect(s.set?.requirements[0].title).toBe('changed');
+    expect(s.isDirty()).toBe(true);
+  });
+
   it('cancel calls the API with the run id', async () => {
     setupRequirementsListeners();
     api.requirementsRead.mockResolvedValue({ success: true, data: { set: null, currentBrdHash: 'H' } });

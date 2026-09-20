@@ -13,6 +13,10 @@ import {
 } from '../types/requirements';
 
 const idSchema = z.string().regex(/^[RMT]\d+$/);
+/** Model-facing: a plain number. Anthropic structured outputs reject integer/min/max constraints in the schema. */
+const orderForModel = z.number().describe('Position, starting at 1');
+/** On disk: a positive integer. */
+const orderStored = z.number().int().positive();
 
 const requirementBody = z.object({
   id: idSchema.optional(),
@@ -26,7 +30,7 @@ const milestoneBody = z.object({
   id: idSchema.optional(),
   name: z.string().min(1),
   description: z.string(),
-  order: z.number().int().positive(),
+  order: orderForModel,
 });
 const taskBody = z.object({
   id: idSchema.optional(),
@@ -35,7 +39,7 @@ const taskBody = z.object({
   milestoneId: z.string().min(1),
   requirementIds: z.array(z.string()),
   category: z.enum(PROPOSED_TASK_CATEGORIES as [string, ...string[]]),
-  order: z.number().int().positive(),
+  order: orderForModel,
 });
 
 export const GeneratedBodySchema = z.object({
@@ -53,8 +57,8 @@ export const RequirementsSetSchema = z.object({
   generatedAt: z.string().min(1),
   approvedAt: z.string().optional(),
   requirements: z.array(requirementBody.extend({ id: idSchema, included: z.boolean() })),
-  milestones: z.array(milestoneBody.extend({ id: idSchema, included: z.boolean() })),
-  tasks: z.array(taskBody.extend({ id: idSchema, included: z.boolean() })),
+  milestones: z.array(milestoneBody.extend({ id: idSchema, included: z.boolean(), order: orderStored })),
+  tasks: z.array(taskBody.extend({ id: idSchema, included: z.boolean(), order: orderStored })),
 });
 
 export function nextId(prefix: 'R' | 'M' | 'T', existing: Array<{ id: string }>): string {
@@ -129,6 +133,7 @@ interface Assigned {
 /** Give every item an id (keeping echoed ids that exist in `previous`), set/copy `included`, drop unknown links. */
 export function assignIds(body: GeneratedBody, previous?: RequirementsSet): Assigned {
   const warnings: string[] = [];
+  const order = (n: number) => (Number.isFinite(n) ? Math.max(1, Math.round(n)) : 1);
   const prevReq = new Map(previous?.requirements.map((r) => [r.id, r]) ?? []);
   const prevMs = new Map(previous?.milestones.map((m) => [m.id, m]) ?? []);
   const prevTask = new Map(previous?.tasks.map((t) => [t.id, t]) ?? []);
@@ -143,7 +148,7 @@ export function assignIds(body: GeneratedBody, previous?: RequirementsSet): Assi
   for (const m of body.milestones) {
     const keep = m.id && prevMs.has(m.id) ? prevMs.get(m.id) : undefined;
     const id = keep ? keep.id : nextId('M', [...milestones, ...prevMs.values()]);
-    milestones.push({ ...m, id, included: keep ? keep.included : true });
+    milestones.push({ ...m, id, order: order(m.order), included: keep ? keep.included : true });
   }
   const reqIds = new Set(requirements.map((r) => r.id));
   const msIds = new Set(milestones.map((m) => m.id));
@@ -157,7 +162,7 @@ export function assignIds(body: GeneratedBody, previous?: RequirementsSet): Assi
       return false;
     });
     if (!msIds.has(t.milestoneId)) warnings.push(`Task ${id} points at unknown milestone ${t.milestoneId}`);
-    tasks.push({ ...t, id, requirementIds, category: t.category as ProposedTask['category'], included: keep ? keep.included : true });
+    tasks.push({ ...t, id, requirementIds, category: t.category as ProposedTask['category'], order: order(t.order), included: keep ? keep.included : true });
   }
   return { requirements, milestones, tasks, warnings };
 }

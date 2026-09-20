@@ -4,9 +4,10 @@
 // apps/desktop/src/renderer/components/requirements/__tests__/BrdEditor.test.tsx
 import '@testing-library/jest-dom/vitest';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrdEditor } from '../BrdEditor';
 import { useBrdStore } from '../../../stores/brd-store';
+import { useRequirementsStore } from '../../../stores/requirements-store';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k: string, o?: Record<string, unknown>) => (o?.error ? `${k}:${o.error}` : k), i18n: { language: 'en' } }),
@@ -52,6 +53,17 @@ describe('BrdEditor', () => {
     fireEvent.click(screen.getByRole('button', { name: 'editor.save' }));
     await screen.findByText('editor.saved');
     expect(api.brdWrite).toHaveBeenCalledWith('p1', 'a', `${doc}\nmore`);
+  });
+
+  it('Save refreshes the requirements BRD hash so staleness shows without reselecting', async () => {
+    api.brdWrite.mockResolvedValue({ success: true, data: { slug: 'a', title: 'A', status: 'draft', modifiedAt: 't2' } });
+    render(<BrdEditor projectId="p1" />);
+    await waitFor(() => expect(useRequirementsStore.getState().currentBrdHash).toBe('x'));
+    api.requirementsRead.mockResolvedValue({ success: true, data: { set: null, currentBrdHash: 'y' } });
+    fireEvent.change(screen.getByRole('textbox', { name: 'editor.markdown' }), { target: { value: `${doc}\nmore` } });
+    fireEvent.click(screen.getByRole('button', { name: 'editor.save' }));
+    await screen.findByText('editor.saved');
+    await waitFor(() => expect(useRequirementsStore.getState().currentBrdHash).toBe('y'));
   });
 
   it('assist panel enables Revise for a non-empty document and shows a proposal to accept', async () => {
