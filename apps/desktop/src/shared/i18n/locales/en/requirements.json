@@ -1,0 +1,57 @@
+{
+  "title": "Requirements",
+  "subtitle": "Business requirements documents stored in docs/brd",
+  "list": {
+    "newBrd": "New BRD",
+    "empty": "No BRDs yet. Create one to get started.",
+    "warning": "Needs attention"
+  },
+  "status": { "draft": "Draft", "review": "In review", "approved": "Approved" },
+  "newDialog": {
+    "title": "New BRD",
+    "description": "A Markdown file will be created under docs/brd from the template.",
+    "titleLabel": "Title",
+    "titlePlaceholder": "Customer onboarding",
+    "create": "Create",
+    "cancel": "Cancel"
+  },
+  "editor": {
+    "noSelection": "Select a BRD or create a new one.",
+    "save": "Save",
+    "saving": "Saving…",
+    "unsaved": "Unsaved changes",
+    "saved": "Saved",
+    "preview": "Preview",
+    "markdown": "Markdown",
+    "loadError": "Could not load this BRD: {{error}}",
+    "saveError": "Could not save: {{error}}"
+  },
+  "unsavedDialog": {
+    "title": "Discard unsaved changes?",
+    "description": "You have unsaved changes in the current BRD. Switching will discard them.",
+    "discard": "Discard changes",
+    "cancel": "Keep editing"
+  },
+  "structure": {
+    "title": "Structure",
+    "ok": "All required sections are filled",
+    "missing": "Missing",
+    "emptySection": "Empty",
+    "optional": "optional",
+    "frontmatter": "Frontmatter"
+  },
+  "assist": {
+    "title": "AI assist",
+    "notesLabel": "Notes or instructions",
+    "notesPlaceholderDraft": "Paste rough notes, goals, and constraints. The agent drafts the whole BRD.",
+    "notesPlaceholderRevise": "Describe what to change, for example: split milestone 2 into two.",
+    "draft": "Draft from notes",
+    "revise": "Revise with instructions",
+    "streaming": "Writing…",
+    "cancel": "Cancel",
+    "proposalTitle": "Proposed document",
+    "accept": "Accept into editor",
+    "discard": "Discard",
+    "error": "The assistant failed: {{error}}"
+  }
+}

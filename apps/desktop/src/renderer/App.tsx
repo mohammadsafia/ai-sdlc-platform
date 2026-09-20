@@ -35,6 +35,7 @@ import { AppSettingsDialog, type AppSection } from './components/settings/AppSet
 import type { ProjectSettingsSection } from './components/settings/ProjectSettingsContent';
 import { TerminalGrid } from './components/TerminalGrid';
 import { Roadmap } from './components/Roadmap';
+import { RequirementsView } from './components/requirements/RequirementsView';
 import { Context } from './components/Context';
 import { Ideation } from './components/Ideation';
 import { Insights } from './components/Insights';
@@ -895,6 +896,11 @@ export function App() {
                 </div>
                 {activeView === 'roadmap' && (activeProjectId || selectedProjectId) && (
                   <Roadmap projectId={activeProjectId || selectedProjectId!} onGoToTask={handleGoToTask} />
+                )}
+                {activeView === 'requirements' && (activeProjectId || selectedProjectId) && (
+                  <ErrorBoundary>
+                    <RequirementsView projectId={activeProjectId || selectedProjectId!} />
+                  </ErrorBoundary>
                 )}
                 {activeView === 'context' && (activeProjectId || selectedProjectId) && (
                   <ErrorBoundary>

@@ -1,0 +1,57 @@
+{
+  "title": "Exigences",
+  "subtitle": "Documents d'exigences métier stockés dans docs/brd",
+  "list": {
+    "newBrd": "Nouveau BRD",
+    "empty": "Aucun BRD pour l'instant. Créez-en un pour commencer.",
+    "warning": "À vérifier"
+  },
+  "status": { "draft": "Brouillon", "review": "En relecture", "approved": "Approuvé" },
+  "newDialog": {
+    "title": "Nouveau BRD",
+    "description": "Un fichier Markdown sera créé sous docs/brd à partir du modèle.",
+    "titleLabel": "Titre",
+    "titlePlaceholder": "Onboarding client",
+    "create": "Créer",
+    "cancel": "Annuler"
+  },
+  "editor": {
+    "noSelection": "Sélectionnez un BRD ou créez-en un nouveau.",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "unsaved": "Modifications non enregistrées",
+    "saved": "Enregistré",
+    "preview": "Aperçu",
+    "markdown": "Markdown",
+    "loadError": "Impossible de charger ce BRD : {{error}}",
+    "saveError": "Impossible d'enregistrer : {{error}}"
+  },
+  "unsavedDialog": {
+    "title": "Abandonner les modifications ?",
+    "description": "Le BRD actuel contient des modifications non enregistrées. Changer de document les supprimera.",
+    "discard": "Abandonner",
+    "cancel": "Continuer l'édition"
+  },
+  "structure": {
+    "title": "Structure",
+    "ok": "Toutes les sections obligatoires sont remplies",
+    "missing": "Manquante",
+    "emptySection": "Vide",
+    "optional": "optionnelle",
+    "frontmatter": "En-tête"
+  },
+  "assist": {
+    "title": "Assistant IA",
+    "notesLabel": "Notes ou instructions",
+    "notesPlaceholderDraft": "Collez des notes brutes, objectifs et contraintes. L'agent rédige tout le BRD.",
+    "notesPlaceholderRevise": "Décrivez le changement souhaité, par exemple : scinder le jalon 2 en deux.",
+    "draft": "Rédiger à partir des notes",
+    "revise": "Réviser selon les instructions",
+    "streaming": "Rédaction…",
+    "cancel": "Annuler",
+    "proposalTitle": "Document proposé",
+    "accept": "Accepter dans l'éditeur",
+    "discard": "Rejeter",
+    "error": "L'assistant a échoué : {{error}}"
+  }
+}
