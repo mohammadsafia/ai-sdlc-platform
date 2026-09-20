@@ -59,6 +59,13 @@ describe('loadBrdProjectContext', () => {
     expect(ctx).toContain('acme');
     expect(ctx).toContain('web');
     expect(ctx).toContain('api');
+    writeFileSync(
+      path.join(dir, '.auto-claude', 'project_index.json'),
+      JSON.stringify({ project_root: '/x/acme', services: { api: { language: 'ts' }, worker: { language: 'py' } } }),
+    );
+    const objCtx = loadBrdProjectContext(dir);
+    expect(objCtx).toContain('api / ts');
+    expect(objCtx).toContain('worker / py');
     rmSync(dir, { recursive: true, force: true });
   });
 });

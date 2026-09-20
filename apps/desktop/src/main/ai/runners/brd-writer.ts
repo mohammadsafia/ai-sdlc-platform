@@ -33,10 +33,12 @@ export type BrdWriterEvent =
 const FALLBACK_SYSTEM =
   'You write Business Requirements Documents in Markdown following the TEMPLATE exactly. Output the document only.';
 
+interface ServiceLike { name?: string; language?: string; framework?: string }
 interface ProjectIndexLike {
   project_root?: string;
   project_type?: string;
-  services?: Array<{ name?: string; language?: string; framework?: string }>;
+  /** Either a list of services or an object keyed by service name */
+  services?: ServiceLike[] | Record<string, ServiceLike>;
 }
 
 /** Compact project summary from .auto-claude/project_index.json, or '' when absent. */
@@ -48,7 +50,11 @@ export function loadBrdProjectContext(projectDir: string): string {
   const lines: string[] = [];
   if (parsed.project_root) lines.push(`Project: ${parsed.project_root.split(/[\\/]/).pop()}`);
   if (parsed.project_type) lines.push(`Type: ${parsed.project_type}`);
-  const services = (parsed.services ?? [])
+  const rawServices = parsed.services ?? [];
+  const serviceList: ServiceLike[] = Array.isArray(rawServices)
+    ? rawServices
+    : Object.entries(rawServices).map(([name, s]) => ({ name, ...(s ?? {}) }));
+  const services = serviceList
     .map((s) => [s.name, s.language, s.framework].filter(Boolean).join(' / '))
     .filter(Boolean);
   if (services.length > 0) lines.push(`Services: ${services.join(', ')}`);
@@ -74,9 +80,9 @@ export function buildBrdWriterPrompts(
 }
 
 export async function runBrdWriter(config: BrdWriterConfig, onEvent: (e: BrdWriterEvent) => void): Promise<void> {
-  const { system, prompt } = buildBrdWriterPrompts(config, loadTemplate('brd-template'), loadBrdProjectContext(config.projectDir));
   let text = '';
   try {
+    const { system, prompt } = buildBrdWriterPrompts(config, loadTemplate('brd-template'), loadBrdProjectContext(config.projectDir));
     const client = await createSimpleClient({
       systemPrompt: system,
       modelShorthand: config.modelShorthand ?? 'sonnet',

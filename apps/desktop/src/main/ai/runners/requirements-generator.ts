@@ -66,9 +66,9 @@ export async function runRequirementsGenerator(
   config: RequirementsRunConfig,
   onEvent: (e: RequirementsRunEvent) => void,
 ): Promise<void> {
-  const { system, prompt } = buildRequirementsPrompts(config, loadBrdProjectContext(config.projectDir));
   onEvent({ type: 'progress', phase: 'started' });
   try {
+    const { system, prompt } = buildRequirementsPrompts(config, loadBrdProjectContext(config.projectDir));
     const client = await createSimpleClient({
       systemPrompt: system,
       modelShorthand: config.modelShorthand ?? 'sonnet',
