@@ -1,4 +1,5 @@
 // apps/desktop/src/renderer/components/requirements/BrdEditor.tsx
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -7,9 +8,12 @@ import { Save } from 'lucide-react';
 import { parseFrontmatter } from '../../../shared/frontmatter';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { useBrdStore } from '../../stores/brd-store';
+import { useRequirementsStore } from '../../stores/requirements-store';
 import { BrdAssistPanel } from './BrdAssistPanel';
 import { StructureChecklist } from './StructureChecklist';
+import { RequirementsTab } from './set/RequirementsTab';
 
 /** A document counts as empty when every required section is empty (fresh template). */
 function documentIsEmpty(structure: ReturnType<typeof useBrdStore.getState>['structure']): boolean {
@@ -21,7 +25,18 @@ export function BrdEditor({ projectId }: { projectId: string }) {
   const { t } = useTranslation('requirements');
   const { selectedSummary, content, setContent, structure, save, isSaving, error } = useBrdStore();
   const dirty = useBrdStore((s) => s.content !== s.savedContent);
+  const slug = selectedSummary?.slug;
+
+  useEffect(() => {
+    if (slug) void useRequirementsStore.getState().load(projectId, slug);
+  }, [projectId, slug]);
+
   if (!selectedSummary) return null;
+
+  const missingSections = structure
+    ? structure.sections.filter((s) => s.required && (!s.present || s.empty)).map((s) => s.heading)
+    : [];
+  const brdReady = !!structure?.ok && !dirty;
 
   return (
     <div className="flex h-full flex-col gap-3 p-4">
@@ -40,22 +55,31 @@ export function BrdEditor({ projectId }: { projectId: string }) {
         </Button>
       </div>
 
-      <StructureChecklist result={structure} />
-
-      <div className="grid min-h-0 flex-1 grid-cols-2 gap-3">
-        <textarea
-          aria-label={t('editor.markdown')}
-          className="h-full w-full resize-none rounded-md border border-border bg-background p-3 font-mono text-xs leading-5 focus:outline-none focus:ring-1 focus:ring-ring"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          spellCheck={false}
-        />
-        <section className="h-full overflow-auto rounded-md border border-border p-3 prose prose-sm dark:prose-invert max-w-none" aria-label={t('editor.preview')}>
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{parseFrontmatter(content)?.body ?? content}</ReactMarkdown>
-        </section>
-      </div>
-
-      <BrdAssistPanel projectId={projectId} documentIsEmpty={documentIsEmpty(structure)} />
+      <Tabs defaultValue="document" className="flex min-h-0 flex-1 flex-col">
+        <TabsList className="w-fit">
+          <TabsTrigger value="document">{t('set.documentTab')}</TabsTrigger>
+          <TabsTrigger value="requirements">{t('set.tab')}</TabsTrigger>
+        </TabsList>
+        <TabsContent value="document" className="flex min-h-0 flex-1 flex-col gap-3 data-[state=inactive]:hidden">
+          <StructureChecklist result={structure} />
+          <div className="grid min-h-0 flex-1 grid-cols-2 gap-3">
+            <textarea
+              aria-label={t('editor.markdown')}
+              className="h-full w-full resize-none rounded-md border border-border bg-background p-3 font-mono text-xs leading-5 focus:outline-none focus:ring-1 focus:ring-ring"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              spellCheck={false}
+            />
+            <section className="h-full overflow-auto rounded-md border border-border p-3 prose prose-sm dark:prose-invert max-w-none" aria-label={t('editor.preview')}>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{parseFrontmatter(content)?.body ?? content}</ReactMarkdown>
+            </section>
+          </div>
+          <BrdAssistPanel projectId={projectId} documentIsEmpty={documentIsEmpty(structure)} />
+        </TabsContent>
+        <TabsContent value="requirements" className="min-h-0 flex-1 data-[state=inactive]:hidden">
+          <RequirementsTab projectId={projectId} brdReady={brdReady} missingSections={missingSections} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

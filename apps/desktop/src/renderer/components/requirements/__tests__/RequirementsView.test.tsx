@@ -19,6 +19,10 @@ const api = {
   onBrdDraftChunk: vi.fn(() => () => undefined),
   onBrdDraftDone: vi.fn(() => () => undefined),
   onBrdDraftError: vi.fn(() => () => undefined),
+  requirementsRead: vi.fn().mockResolvedValue({ success: true, data: { set: null, currentBrdHash: 'x' } }),
+  onRequirementsProgress: vi.fn(() => () => undefined),
+  onRequirementsDone: vi.fn(() => () => undefined),
+  onRequirementsError: vi.fn(() => () => undefined),
 };
 const doc = '---\ntitle: A\nstatus: draft\ncreated: 2026-09-20\n---\n# A\n';
 

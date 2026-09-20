@@ -15,7 +15,12 @@ vi.mock('react-markdown', () => ({ default: ({ children }: { children: string })
 vi.mock('remark-gfm', () => ({ default: () => null }));
 
 const doc = '---\ntitle: A\nstatus: draft\ncreated: 2026-09-20\n---\n# A\n\n## Summary\n\nText\n';
-const api = { brdWrite: vi.fn(), brdDraft: vi.fn(), brdDraftCancel: vi.fn() };
+const api = {
+  brdWrite: vi.fn(),
+  brdDraft: vi.fn(),
+  brdDraftCancel: vi.fn(),
+  requirementsRead: vi.fn().mockResolvedValue({ success: true, data: { set: null, currentBrdHash: 'x' } }),
+};
 
 beforeEach(() => {
   vi.clearAllMocks();

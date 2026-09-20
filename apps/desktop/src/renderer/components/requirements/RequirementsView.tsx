@@ -7,6 +7,7 @@ import {
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '../ui/alert-dialog';
 import { setupBrdListeners, useBrdStore } from '../../stores/brd-store';
+import { setupRequirementsListeners, useRequirementsStore } from '../../stores/requirements-store';
 import { BrdEditor } from './BrdEditor';
 import { BrdList } from './BrdList';
 import { NewBrdDialog } from './NewBrdDialog';
@@ -20,16 +21,25 @@ export function RequirementsView({ projectId }: { projectId: string }) {
 
   useEffect(() => {
     const stop = setupBrdListeners();
+    const stopRequirements = setupRequirementsListeners();
     reset();
+    useRequirementsStore.getState().reset();
     void load(projectId);
     return () => {
       stop();
+      stopRequirements();
     };
   }, [projectId, load, reset]);
 
+  /** Either the document or its requirements set has unsaved edits. */
+  const anyDirty = () => useBrdStore.getState().isDirty() || useRequirementsStore.getState().isDirty();
+
   const handleSelect = async (slug: string) => {
-    const ok = await select(projectId, slug);
-    if (!ok && useBrdStore.getState().isDirty()) setPendingSlug(slug);
+    if (anyDirty()) {
+      setPendingSlug(slug);
+      return;
+    }
+    await select(projectId, slug);
   };
 
   return (
@@ -38,7 +48,7 @@ export function RequirementsView({ projectId }: { projectId: string }) {
         brds={brds}
         selectedSlug={selectedSlug}
         onSelect={(s) => void handleSelect(s)}
-        onNew={() => (useBrdStore.getState().isDirty() ? setPendingSlug('__new__') : setShowNew(true))}
+        onNew={() => (anyDirty() ? setPendingSlug('__new__') : setShowNew(true))}
       />
       <div className="min-h-0">
         {error && !selectedSlug && <p className="px-4 pt-4 text-sm text-destructive">{error}</p>}
@@ -69,6 +79,7 @@ export function RequirementsView({ projectId }: { projectId: string }) {
               onClick={() => {
                 const slug = pendingSlug;
                 setPendingSlug(null);
+                useRequirementsStore.getState().reset();
                 if (slug === '__new__') {
                   useBrdStore.setState((s) => ({ content: s.savedContent, structure: s.structure }));
                   setShowNew(true);

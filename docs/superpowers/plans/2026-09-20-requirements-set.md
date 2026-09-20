@@ -1964,7 +1964,7 @@ export function RequirementsAssist({ projectId }: { projectId: string }) {
           <ul className="mt-2 text-xs text-muted-foreground">
             {(['requirements', 'milestones', 'tasks'] as const).map((s) => (
               <li key={s}>
-                {t(`set.sections.${s}`)}: {t('set.assist.counts', counts[s])}
+                {t(`set.sections.${s}`)}: {t('set.assist.counts', { added: counts[s].added, changed: counts[s].changed, removed: counts[s].removed })}
               </li>
             ))}
           </ul>
@@ -2000,10 +2000,10 @@ import { useRequirementsStore } from '../../../stores/requirements-store';
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="block text-xs">
+    <div className="text-xs">
       <span className="mb-1 block font-medium text-muted-foreground">{label}</span>
       {children}
-    </label>
+    </div>
   );
 }
 
@@ -2015,14 +2015,14 @@ function ItemFrame({ id, included, selected, onInclude, onSelect, children }: {
     <div className={cn('rounded-md border border-border p-3 space-y-2', !included && 'opacity-60')}>
       <div className="flex items-center gap-3 text-xs">
         <span className="font-mono font-medium">{id}</span>
-        <label className="flex items-center gap-1">
+        <span className="flex items-center gap-1">
           <Checkbox aria-label={`${t('set.fields.included')} ${id}`} checked={included} onCheckedChange={onInclude} />
           {t('set.fields.included')}
-        </label>
-        <label className="flex items-center gap-1">
+        </span>
+        <span className="flex items-center gap-1">
           <Checkbox aria-label={`${t('set.fields.select')} ${id}`} checked={selected} onCheckedChange={onSelect} />
           {t('set.fields.select')}
-        </label>
+        </span>
       </div>
       {children}
     </div>
@@ -2042,14 +2042,15 @@ export function RequirementsSetEditor() {
       <Field label={t('set.fields.description')}><Textarea rows={2} value={r.description} onChange={(e) => edit('requirements', r.id, { description: e.target.value })} /></Field>
       <div className="grid grid-cols-2 gap-2">
         <Field label={t('set.fields.area')}><Input value={r.area} onChange={(e) => edit('requirements', r.id, { area: e.target.value })} /></Field>
-        <label className="flex items-end gap-2 pb-2 text-xs">
-          <Checkbox checked={r.needsDesign} onCheckedChange={() => edit('requirements', r.id, { needsDesign: !r.needsDesign })} />
+        <span className="flex items-end gap-2 pb-2 text-xs">
+          <Checkbox aria-label={`${t('set.fields.needsDesign')} ${r.id}`} checked={r.needsDesign} onCheckedChange={() => edit('requirements', r.id, { needsDesign: !r.needsDesign })} />
           {t('set.fields.needsDesign')}
-        </label>
+        </span>
       </div>
       <div className="text-xs">
         <span className="mb-1 block font-medium text-muted-foreground">{t('set.fields.acceptance')}</span>
         {r.acceptanceCriteria.map((c, i) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: criteria are plain strings without ids
           <div key={`${r.id}-ac-${i}`} className="mb-1 flex gap-1">
             <Input value={c} onChange={(e) => edit('requirements', r.id, { acceptanceCriteria: r.acceptanceCriteria.map((x, j) => (j === i ? e.target.value : x)) })} />
             <Button size="icon" variant="ghost" aria-label="remove" onClick={() => edit('requirements', r.id, { acceptanceCriteria: r.acceptanceCriteria.filter((_, j) => j !== i) })}><X className="h-3.5 w-3.5" /></Button>
