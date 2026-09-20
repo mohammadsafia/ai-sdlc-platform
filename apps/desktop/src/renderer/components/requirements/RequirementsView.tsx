@@ -13,8 +13,9 @@ import { NewBrdDialog } from './NewBrdDialog';
 
 export function RequirementsView({ projectId }: { projectId: string }) {
   const { t } = useTranslation('requirements');
-  const { brds, selectedSlug, load, select, create, reset } = useBrdStore();
+  const { brds, selectedSlug, load, select, create, reset, error } = useBrdStore();
   const [showNew, setShowNew] = useState(false);
+  /** Slug to open after the user discards changes; '__new__' opens the New BRD dialog. */
   const [pendingSlug, setPendingSlug] = useState<string | null>(null);
 
   useEffect(() => {
@@ -33,8 +34,14 @@ export function RequirementsView({ projectId }: { projectId: string }) {
 
   return (
     <div className="grid h-full grid-cols-[280px_1fr]">
-      <BrdList brds={brds} selectedSlug={selectedSlug} onSelect={(s) => void handleSelect(s)} onNew={() => setShowNew(true)} />
+      <BrdList
+        brds={brds}
+        selectedSlug={selectedSlug}
+        onSelect={(s) => void handleSelect(s)}
+        onNew={() => (useBrdStore.getState().isDirty() ? setPendingSlug('__new__') : setShowNew(true))}
+      />
       <div className="min-h-0">
+        {error && !selectedSlug && <p className="px-4 pt-4 text-sm text-destructive">{error}</p>}
         {selectedSlug ? (
           <BrdEditor projectId={projectId} />
         ) : (
@@ -62,7 +69,12 @@ export function RequirementsView({ projectId }: { projectId: string }) {
               onClick={() => {
                 const slug = pendingSlug;
                 setPendingSlug(null);
-                if (slug) void select(projectId, slug, { force: true });
+                if (slug === '__new__') {
+                  useBrdStore.setState((s) => ({ content: s.savedContent, structure: s.structure }));
+                  setShowNew(true);
+                } else if (slug) {
+                  void select(projectId, slug, { force: true });
+                }
               }}
             >
               {t('unsavedDialog.discard')}

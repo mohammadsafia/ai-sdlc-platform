@@ -5,7 +5,12 @@
  * packaged, otherwise the first candidate containing brd-template.md.
  */
 import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+// ESM-compatible __dirname (the main bundle is ESM; see changelog-service.ts)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 let resolved: string | null = null;
 
