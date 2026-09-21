@@ -1,6 +1,13 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/*
+ * Dark mode is class-based: App.tsx toggles `.dark` on <html> from the user's theme
+ * setting. Without this, Tailwind v4 compiles `dark:` to prefers-color-scheme, so a
+ * light app theme on a dark OS got inverted prose text (light on light).
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Auto-Build UI Design System - Oscura Midnight Theme */
 /* A modern, professional design system with deep dark mode and warm yellow accents */
 
