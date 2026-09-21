@@ -44,6 +44,7 @@ import { TaskLogs } from './TaskLogs';
 import { TaskFiles } from './TaskFiles';
 import { TaskSkillsUsed } from './TaskSkillsUsed';
 import { TaskRequirements } from './TaskRequirements';
+import { TaskJira } from './TaskJira';
 import { TaskReview } from './TaskReview';
 import type { Task, WorktreeCreatePROptions } from '../../../shared/types';
 
@@ -519,6 +520,9 @@ function TaskDetailModalContent({ open, task, onOpenChange, onSwitchToTerminals,
 
                       {/* Origin in the requirements set (released tasks only) */}
                       <TaskRequirements task={task} onOpenBrd={onNavigateToRequirements} />
+
+                      {/* Jira link and sync state (imported or pushed tasks only) */}
+                      <TaskJira task={task} />
 
                       {/* Human Review Section */}
                       {state.needsReview && (

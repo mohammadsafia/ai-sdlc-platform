@@ -1,9 +1,10 @@
 // apps/desktop/src/renderer/components/requirements/set/RequirementsSetEditor.tsx
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowDown, ArrowUp, Lock, Plus, Rocket, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, ExternalLink, Lock, Plus, Rocket, X } from 'lucide-react';
 
 import { isMilestoneComplete, lockedIds as computeLockedIds, releasedTaskSpecIds, requirementRollup } from '../../../../shared/brd/release';
+import { isMilestonePushed } from '../../../../shared/jira/push';
 import { PROPOSED_TASK_CATEGORIES, type Milestone, type ProposedTask, type Requirement } from '../../../../shared/types/requirements';
 import type { TaskStatus } from '../../../../shared/types/task';
 import { Badge } from '../../ui/badge';
@@ -12,6 +13,7 @@ import { Checkbox } from '../../ui/checkbox';
 import { Input } from '../../ui/input';
 import { Textarea } from '../../ui/textarea';
 import { cn } from '../../../lib/utils';
+import { useProjectEnvStore } from '../../../stores/project-env-store';
 import { useRequirementsStore } from '../../../stores/requirements-store';
 import { useTaskStore } from '../../../stores/task-store';
 
@@ -52,7 +54,10 @@ function ItemFrame({ id, included, selected, locked, trailing, onInclude, onSele
 
 export function RequirementsSetEditor({ projectId }: { projectId: string }) {
   const { t } = useTranslation('requirements');
-  const { set, selection, edit, toggleInclude, toggleSelect, moveMilestone, release, releaseReason, isReleasing } = useRequirementsStore();
+  const { t: tj } = useTranslation('jira');
+  const { set, selection, edit, toggleInclude, toggleSelect, moveMilestone, release, releaseReason, isReleasing, pushToJira, isPushing } = useRequirementsStore();
+  const jiraEnabled = useProjectEnvStore((s) => s.envConfig?.jiraEnabled ?? false);
+  const jiraBaseUrl = useProjectEnvStore((s) => s.envConfig?.jiraBaseUrl ?? '');
   const tasks = useTaskStore((s) => s.tasks);
   // Derived once per set: a selector returning a fresh Set each render would loop.
   const locked = useMemo(() => (set ? computeLockedIds(set) : new Set<string>()), [set]);
@@ -65,15 +70,36 @@ export function RequirementsSetEditor({ projectId }: { projectId: string }) {
   const rollup = requirementRollup(set, statusBySpec);
   const isLocked = (id: string) => locked.has(id);
   const fmtDate = (iso: string) => new Date(iso).toLocaleDateString();
+  const jiraLink = (key: string) => (jiraBaseUrl ? `${jiraBaseUrl.replace(/\/+$/, '')}/browse/${key}` : undefined);
+  const jiraIssueKey = (proposedTaskId: string): string | undefined => {
+    for (const entry of Object.values(set.releases ?? {})) {
+      const key = entry.jira?.issues[proposedTaskId];
+      if (key) return key;
+    }
+    return undefined;
+  };
 
   const statusChip = (proposedTaskId: string) => {
     const specId = specIds.get(proposedTaskId);
     if (!specId) return null;
     const status = statusBySpec.get(specId);
+    const issueKey = jiraEnabled ? jiraIssueKey(proposedTaskId) : undefined;
     return (
-      <Badge variant="outline" title={specId}>
-        {status ? t(`release.status.${status}`) : t('release.statusUnavailable')}
-      </Badge>
+      <span className="flex items-center gap-1">
+        {issueKey && (
+          <a
+            className="font-mono text-xs text-info hover:underline"
+            href={jiraLink(issueKey) ?? '#'}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {issueKey}
+          </a>
+        )}
+        <Badge variant="outline" title={specId}>
+          {status ? t(`release.status.${status}`) : t('release.statusUnavailable')}
+        </Badge>
+      </span>
     );
   };
 
@@ -172,7 +198,30 @@ export function RequirementsSetEditor({ projectId }: { projectId: string }) {
     const complete = isMilestoneComplete(set, m.id);
     const reason = releaseReason(m.id);
     if (entry && complete) {
-      return <Badge variant="secondary">{t('release.released', { date: fmtDate(entry.releasedAt) })}</Badge>;
+      const jira = entry.jira;
+      const pushed = isMilestonePushed(set, m.id);
+      return (
+        <span className="flex items-center gap-2">
+          <Badge variant="secondary">{t('release.released', { date: fmtDate(entry.releasedAt) })}</Badge>
+          {jiraEnabled && jira && (
+            <a
+              className="inline-flex items-center gap-1 text-xs text-info hover:underline"
+              href={jiraLink(jira.epicKey) ?? '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLink className="h-3 w-3" />
+              {tj('chip.epic', { key: jira.epicKey })}
+            </a>
+          )}
+          {jiraEnabled && jira && !pushed && <Badge variant="outline">{tj('chip.partial')}</Badge>}
+          {jiraEnabled && !pushed && (
+            <Button size="sm" variant="outline" disabled={isPushing} onClick={() => void pushToJira(projectId, m.id)}>
+              {isPushing ? tj('chip.pushing') : tj('chip.push')}
+            </Button>
+          )}
+        </span>
+      );
     }
     return (
       <span className="flex items-center gap-2">

@@ -8,6 +8,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { RequirementsSetEditor } from '../RequirementsSetEditor';
 import { useRequirementsStore } from '../../../../stores/requirements-store';
 import { useTaskStore } from '../../../../stores/task-store';
+import { useProjectEnvStore } from '../../../../stores/project-env-store';
 import type { RequirementsSet } from '../../../../../shared/types/requirements';
 import type { Task } from '../../../../../shared/types';
 
@@ -30,14 +31,16 @@ const set: RequirementsSet = {
     { id: 'T2', title: 'Add invites', description: 'd', milestoneId: 'M2', requirementIds: ['R1'], category: 'feature', order: 1, included: true },
   ],
 };
-const released: RequirementsSet = { ...set, releases: { M1: { releasedAt: '2026-09-21T10:00:00.000Z', tasks: [{ proposedTaskId: 'T1', specId: '001-build-wizard' }] } } };
-const api = { requirementsRelease: vi.fn(), requirementsGenerate: vi.fn(), requirementsWrite: vi.fn(), requirementsApprove: vi.fn(), requirementsCancel: vi.fn() };
+const m1Release = { releasedAt: '2026-09-21T10:00:00.000Z', tasks: [{ proposedTaskId: 'T1', specId: '001-build-wizard' }] };
+const released: RequirementsSet = { ...set, releases: { M1: m1Release } };
+const api = { requirementsRelease: vi.fn(), requirementsGenerate: vi.fn(), requirementsWrite: vi.fn(), requirementsApprove: vi.fn(), requirementsCancel: vi.fn(), jiraPushMilestone: vi.fn() };
 
 beforeEach(() => {
   vi.clearAllMocks();
   (window as unknown as { electronAPI: unknown }).electronAPI = api;
   useRequirementsStore.getState().reset();
   useTaskStore.setState({ tasks: [] });
+  useProjectEnvStore.setState({ envConfig: null });
 });
 
 describe('RequirementsSetEditor release controls', () => {
@@ -83,5 +86,37 @@ describe('RequirementsSetEditor release controls', () => {
     useRequirementsStore.setState({ slug: 'a', set: released, savedSet: released, currentBrdHash: 'H' });
     render(<RequirementsSetEditor projectId="p1" />);
     expect(screen.getByText('release.statusUnavailable')).toBeInTheDocument();
+  });
+});
+
+describe('RequirementsSetEditor Jira chips', () => {
+  const pushed: RequirementsSet = {
+    ...released,
+    releases: {
+      M1: { ...m1Release, jira: { epicKey: 'ACME-1', issues: { T1: 'ACME-2' }, pushedAt: 't' } },
+    },
+  };
+
+  it('shows Push to Jira on a released, unpushed milestone when Jira is enabled and calls the store', () => {
+    useProjectEnvStore.setState({ envConfig: { jiraEnabled: true } as never });
+    useRequirementsStore.setState({ slug: 'a', set: released, savedSet: released, currentBrdHash: 'H' });
+    api.jiraPushMilestone.mockResolvedValue({ success: true, data: { set: pushed, warnings: [] } });
+    render(<RequirementsSetEditor projectId="p1" />);
+    fireEvent.click(screen.getByRole('button', { name: 'chip.push' }));
+    expect(api.jiraPushMilestone).toHaveBeenCalledWith('p1', 'a', 'M1');
+  });
+
+  it('shows the epic link and issue chips when pushed, and nothing when Jira is disabled', () => {
+    useProjectEnvStore.setState({ envConfig: { jiraEnabled: true, jiraBaseUrl: 'https://j' } as never });
+    useRequirementsStore.setState({ slug: 'a', set: pushed, savedSet: pushed, currentBrdHash: 'H' });
+    const { unmount } = render(<RequirementsSetEditor projectId="p1" />);
+    expect(screen.getByText('chip.epic:ACME-1')).toBeInTheDocument();
+    expect(screen.getByText('ACME-2')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'chip.push' })).not.toBeInTheDocument();
+    unmount();
+    useProjectEnvStore.setState({ envConfig: { jiraEnabled: false } as never });
+    render(<RequirementsSetEditor projectId="p1" />);
+    expect(screen.queryByText('chip.epic:ACME-1')).not.toBeInTheDocument();
+    expect(screen.queryByText('ACME-2')).not.toBeInTheDocument();
   });
 });

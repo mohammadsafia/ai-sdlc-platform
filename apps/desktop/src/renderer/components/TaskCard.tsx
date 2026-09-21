@@ -105,6 +105,7 @@ function taskCardPropsAreEqual(prevProps: TaskCardProps, nextProps: TaskCardProp
     prevTask.metadata?.complexity === nextTask.metadata?.complexity &&
     prevTask.metadata?.archivedAt === nextTask.metadata?.archivedAt &&
     prevTask.metadata?.prUrl === nextTask.metadata?.prUrl &&
+    prevTask.metadata?.jiraKey === nextTask.metadata?.jiraKey &&
     // Check if any subtask statuses changed (compare all subtasks)
     prevTask.subtasks.every((s, i) => s.status === nextTask.subtasks[i]?.status)
   );
@@ -400,6 +401,15 @@ export const TaskCard = memo(function TaskCard({
               >
                 <Archive className="h-2.5 w-2.5" />
                 {t('status.archived')}
+              </Badge>
+            )}
+            {/* Jira issue key - task was imported from or pushed to Jira */}
+            {task.metadata?.jiraKey && (
+              <Badge
+                variant="outline"
+                className="text-[10px] px-1.5 py-0.5 font-mono bg-info/10 text-info border-info/30"
+              >
+                {task.metadata.jiraKey}
               </Badge>
             )}
             {/* Execution phase badge - shown when actively running */}
