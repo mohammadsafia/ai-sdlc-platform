@@ -61,7 +61,7 @@ export function RequirementsTab({ projectId, brdReady, missingSections }: Requir
       {(error || run.error) && <p className="text-xs text-destructive">{t('set.error', { error: error ?? run.error })}</p>}
 
       <div className="min-h-0 flex-1 overflow-auto pr-1">
-        <RequirementsSetEditor />
+        <RequirementsSetEditor projectId={projectId} />
         <div className="mt-4"><RequirementsAssist projectId={projectId} /></div>
       </div>
 

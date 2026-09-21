@@ -1374,7 +1374,8 @@ describe('RequirementsSetEditor release controls', () => {
     useRequirementsStore.setState({ slug: 'a', set: draft, savedSet: draft, currentBrdHash: 'H' });
     render(<RequirementsSetEditor projectId="p1" />);
     expect(screen.getAllByRole('button', { name: 'release.button' })[0]).toBeDisabled();
-    expect(screen.getByText('release.reason.notApproved')).toBeInTheDocument();
+    // Status is checked before ordering, so every milestone reports the same reason
+    expect(screen.getAllByText('release.reason.notApproved')).toHaveLength(2);
   });
 
   it('renders released items read-only with a badge, a status chip, and a rollup', () => {
@@ -1414,10 +1415,11 @@ Rewrite `src/renderer/components/requirements/set/RequirementsSetEditor.tsx` as 
 
 ```tsx
 // apps/desktop/src/renderer/components/requirements/set/RequirementsSetEditor.tsx
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowDown, ArrowUp, Lock, Plus, Rocket, X } from 'lucide-react';
 
-import { isMilestoneComplete, releasedTaskSpecIds, requirementRollup } from '../../../../shared/brd/release';
+import { isMilestoneComplete, lockedIds as computeLockedIds, releasedTaskSpecIds, requirementRollup } from '../../../../shared/brd/release';
 import { PROPOSED_TASK_CATEGORIES, type Milestone, type ProposedTask, type Requirement } from '../../../../shared/types/requirements';
 import type { TaskStatus } from '../../../../shared/types/task';
 import { Badge } from '../../ui/badge';
@@ -1467,8 +1469,9 @@ function ItemFrame({ id, included, selected, locked, trailing, onInclude, onSele
 export function RequirementsSetEditor({ projectId }: { projectId: string }) {
   const { t } = useTranslation('requirements');
   const { set, selection, edit, toggleInclude, toggleSelect, moveMilestone, release, releaseReason, isReleasing } = useRequirementsStore();
-  const locked = useRequirementsStore((s) => s.lockedIds());
   const tasks = useTaskStore((s) => s.tasks);
+  // Derived once per set: a selector returning a fresh Set each render would loop.
+  const locked = useMemo(() => (set ? computeLockedIds(set) : new Set<string>()), [set]);
   if (!set) return null;
 
   const milestones = [...set.milestones].sort((a, b) => a.order - b.order);
