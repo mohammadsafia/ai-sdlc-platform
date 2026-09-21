@@ -26,6 +26,7 @@ import { registerIdeationHandlers } from './ideation-handlers';
 import { registerChangelogHandlers } from './changelog-handlers';
 import { registerInsightsHandlers } from './insights-handlers';
 import { registerBrdHandlers } from './brd-handlers';
+import { registerDesignHandlers } from './design-handlers';
 import { registerRequirementsHandlers } from './requirements-handlers';
 import { registerJiraHandlers } from './jira';
 import { registerBitbucketHandlers } from './bitbucket';
@@ -108,6 +109,7 @@ export function setupIpcHandlers(
   // Insights handlers
   registerInsightsHandlers(getMainWindow);
   registerBrdHandlers(getMainWindow);
+  registerDesignHandlers(getMainWindow);
   registerRequirementsHandlers(getMainWindow);
   registerJiraHandlers();
   registerBitbucketHandlers();

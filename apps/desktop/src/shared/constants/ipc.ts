@@ -27,6 +27,16 @@ export const IPC_CHANNELS = {
   BRD_DRAFT_ERROR: 'brd:draft-error',
   BRD_CHANGES: 'brd:changes',
   BRD_COMMIT: 'brd:commit',
+  DESIGN_LIST: 'design:list',
+  DESIGN_READ: 'design:read',
+  DESIGN_WRITE: 'design:write',
+  DESIGN_CREATE: 'design:create',
+  DESIGN_SET_STATUS: 'design:setStatus',
+  DESIGN_DRAFT: 'design:draft',
+  DESIGN_DRAFT_CANCEL: 'design:draft-cancel',
+  DESIGN_DRAFT_CHUNK: 'design:draft-chunk',
+  DESIGN_DRAFT_DONE: 'design:draft-done',
+  DESIGN_DRAFT_ERROR: 'design:draft-error',
 
   // Requirements set
   REQUIREMENTS_READ: 'requirements:read',

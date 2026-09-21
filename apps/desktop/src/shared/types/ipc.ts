@@ -108,6 +108,14 @@ import type {
   InsightsModelConfig
 } from './insights';
 import type { BrdDraftChunk, BrdDraftDone, BrdDraftError, BrdDraftRequest, BrdSummary, BrdChanges, BrdCommitResult } from './brd';
+import type {
+  DesignBriefStatus,
+  DesignBriefSummary,
+  DesignDraftChunk,
+  DesignDraftDone,
+  DesignDraftError,
+  DesignDraftRequest,
+} from './design';
 import type { RequirementsDone, RequirementsError, RequirementsGenerateRequest, RequirementsProgress, RequirementsSet } from './requirements';
 import type {
   CompetitorAnalysis,
@@ -835,6 +843,16 @@ export interface ElectronAPI {
   brdDraftCancel: (runId: string) => Promise<IPCResult>;
   brdChanges: (projectId: string) => Promise<IPCResult<BrdChanges>>;
   brdCommit: (projectId: string, message: string, push: boolean) => Promise<IPCResult<BrdCommitResult>>;
+  designList: (projectId: string) => Promise<IPCResult<DesignBriefSummary[]>>;
+  designRead: (projectId: string, brdSlug: string, requirementId: string) => Promise<IPCResult<{ summary: DesignBriefSummary; content: string }>>;
+  designWrite: (projectId: string, brdSlug: string, requirementId: string, content: string) => Promise<IPCResult<DesignBriefSummary>>;
+  designCreate: (projectId: string, brdSlug: string, requirementId: string) => Promise<IPCResult<DesignBriefSummary>>;
+  designSetStatus: (projectId: string, brdSlug: string, requirementId: string, status: DesignBriefStatus) => Promise<IPCResult<DesignBriefSummary>>;
+  designDraft: (projectId: string, request: DesignDraftRequest) => Promise<IPCResult<{ runId: string }>>;
+  designDraftCancel: (runId: string) => Promise<IPCResult>;
+  onDesignDraftChunk: (callback: (chunk: DesignDraftChunk) => void) => () => void;
+  onDesignDraftDone: (callback: (done: DesignDraftDone) => void) => () => void;
+  onDesignDraftError: (callback: (error: DesignDraftError) => void) => () => void;
   onBrdDraftChunk: (callback: (chunk: BrdDraftChunk) => void) => () => void;
   onBrdDraftDone: (callback: (done: BrdDraftDone) => void) => () => void;
   onBrdDraftError: (callback: (error: BrdDraftError) => void) => () => void;

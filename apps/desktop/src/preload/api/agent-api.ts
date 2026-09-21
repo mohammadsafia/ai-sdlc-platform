@@ -15,6 +15,7 @@ import { createRoadmapAPI, RoadmapAPI } from './modules/roadmap-api';
 import { createIdeationAPI, IdeationAPI } from './modules/ideation-api';
 import { createInsightsAPI, InsightsAPI } from './modules/insights-api';
 import { createBrdAPI, BrdAPI } from './modules/brd-api';
+import { createDesignAPI, DesignAPI } from './modules/design-api';
 import { createRequirementsAPI, RequirementsAPI } from './modules/requirements-api';
 import { createChangelogAPI, ChangelogAPI } from './modules/changelog-api';
 import { createLinearAPI, LinearAPI } from './modules/linear-api';
@@ -33,6 +34,7 @@ export interface AgentAPI extends
   IdeationAPI,
   InsightsAPI,
   BrdAPI,
+  DesignAPI,
   RequirementsAPI,
   ChangelogAPI,
   LinearAPI,
@@ -52,6 +54,7 @@ export const createAgentAPI = (): AgentAPI => {
   const ideationAPI = createIdeationAPI();
   const insightsAPI = createInsightsAPI();
   const brdAPI = createBrdAPI();
+  const designAPI = createDesignAPI();
   const requirementsAPI = createRequirementsAPI();
   const changelogAPI = createChangelogAPI();
   const linearAPI = createLinearAPI();
@@ -71,6 +74,7 @@ export const createAgentAPI = (): AgentAPI => {
     // Insights API
     ...insightsAPI,
     ...brdAPI,
+    ...designAPI,
     ...requirementsAPI,
 
     // Changelog API
@@ -98,6 +102,7 @@ export type {
   IdeationAPI,
   InsightsAPI,
   BrdAPI,
+  DesignAPI,
   RequirementsAPI,
   ChangelogAPI,
   LinearAPI,
