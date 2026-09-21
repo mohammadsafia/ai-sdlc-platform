@@ -145,6 +145,8 @@ import type {
   JiraMetadata,
   JiraSearchParams,
   JiraSearchResult,
+  BitbucketConnectionStatus,
+  BitbucketRepoRef,
 } from './integrations';
 import type { APIProfile, ProfilesFile, TestConnectionResult, DiscoverModelsResult } from './profile';
 import type { ProviderAccount } from './provider-account';
@@ -849,6 +851,8 @@ export interface ElectronAPI {
   jiraImportIssues: (projectId: string, keys: string[]) => Promise<IPCResult<JiraImportResult>>;
   jiraPushMilestone: (projectId: string, slug: string, milestoneId: string) => Promise<IPCResult<{ set: RequirementsSet; warnings: string[] }>>;
   jiraRetrySync: (projectId: string, taskId: string) => Promise<IPCResult<{ synced: boolean; error?: string }>>;
+  bitbucketCheckConnection: (projectId: string) => Promise<IPCResult<BitbucketConnectionStatus>>;
+  bitbucketDetectRepo: (projectId: string) => Promise<IPCResult<BitbucketRepoRef | null>>;
   onRequirementsProgress: (callback: (p: RequirementsProgress) => void) => () => void;
   onRequirementsDone: (callback: (d: RequirementsDone) => void) => () => void;
   onRequirementsError: (callback: (e: RequirementsError) => void) => () => void;

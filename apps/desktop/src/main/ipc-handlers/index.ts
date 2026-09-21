@@ -28,6 +28,7 @@ import { registerInsightsHandlers } from './insights-handlers';
 import { registerBrdHandlers } from './brd-handlers';
 import { registerRequirementsHandlers } from './requirements-handlers';
 import { registerJiraHandlers } from './jira';
+import { registerBitbucketHandlers } from './bitbucket';
 import { registerMemoryHandlers } from './memory-handlers';
 import { registerAppUpdateHandlers } from './app-update-handlers';
 import { registerDebugHandlers } from './debug-handlers';
@@ -109,6 +110,7 @@ export function setupIpcHandlers(
   registerBrdHandlers(getMainWindow);
   registerRequirementsHandlers(getMainWindow);
   registerJiraHandlers();
+  registerBitbucketHandlers();
 
   // Memory & infrastructure handlers (for LadybugDB)
   registerMemoryHandlers();
@@ -154,6 +156,7 @@ export {
   registerGithubHandlers,
   registerGitlabHandlers,
   registerJiraHandlers,
+  registerBitbucketHandlers,
   registerIdeationHandlers,
   registerChangelogHandlers,
   registerInsightsHandlers,

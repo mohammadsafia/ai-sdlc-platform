@@ -21,6 +21,7 @@ import { createLinearAPI, LinearAPI } from './modules/linear-api';
 import { createGitHubAPI, GitHubAPI } from './modules/github-api';
 import { createGitLabAPI, GitLabAPI } from './modules/gitlab-api';
 import { createJiraAPI, JiraAPI } from './modules/jira-api';
+import { createBitbucketAPI, BitbucketAPI } from './modules/bitbucket-api';
 import { createShellAPI, ShellAPI } from './modules/shell-api';
 
 /**
@@ -38,6 +39,7 @@ export interface AgentAPI extends
   GitHubAPI,
   GitLabAPI,
   JiraAPI,
+  BitbucketAPI,
   ShellAPI {}
 
 /**
@@ -56,6 +58,7 @@ export const createAgentAPI = (): AgentAPI => {
   const githubAPI = createGitHubAPI();
   const gitlabAPI = createGitLabAPI();
   const jiraAPI = createJiraAPI();
+  const bitbucketAPI = createBitbucketAPI();
   const shellAPI = createShellAPI();
 
   return {
@@ -82,6 +85,7 @@ export const createAgentAPI = (): AgentAPI => {
     // GitLab Integration API
     ...gitlabAPI,
     ...jiraAPI,
+    ...bitbucketAPI,
 
     // Shell Operations API
     ...shellAPI
@@ -100,5 +104,6 @@ export type {
   GitHubAPI,
   GitLabAPI,
   JiraAPI,
+  BitbucketAPI,
   ShellAPI
 };

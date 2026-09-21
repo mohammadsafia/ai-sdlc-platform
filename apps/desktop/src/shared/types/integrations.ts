@@ -493,3 +493,7 @@ export interface JiraIssueSummary {
 export interface JiraSearchParams { jql?: string; status?: string; pageToken?: string }
 export interface JiraSearchResult { issues: JiraIssueSummary[]; nextPageToken?: string }
 export interface JiraImportResult { imported: number; skipped: string[]; failed: Array<{ key: string; error: string }>; tasks: Task[] }
+
+// Bitbucket
+export type { BitbucketRepoRef } from '../bitbucket/remote';
+export interface BitbucketConnectionStatus { accountName: string; repoName?: string }

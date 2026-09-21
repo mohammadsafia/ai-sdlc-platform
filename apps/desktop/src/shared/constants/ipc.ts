@@ -43,6 +43,8 @@ export const IPC_CHANNELS = {
   JIRA_IMPORT_ISSUES: 'jira:importIssues',
   JIRA_PUSH_MILESTONE: 'jira:pushMilestone',
   JIRA_RETRY_SYNC: 'jira:retrySync',
+  BITBUCKET_CHECK_CONNECTION: 'bitbucket:checkConnection',
+  BITBUCKET_DETECT_REPO: 'bitbucket:detectRepo',
   PROJECT_CHECK_VERSION: 'project:checkVersion',
 
   // Tab state operations (persisted in main process)

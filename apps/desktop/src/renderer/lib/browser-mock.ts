@@ -250,6 +250,8 @@ const browserMockAPI: ElectronAPI = {
   jiraImportIssues: async () => ({ success: false, error: 'Not available in browser mock' }),
   jiraPushMilestone: async () => ({ success: false, error: 'Not available in browser mock' }),
   jiraRetrySync: async () => ({ success: false, error: 'Not available in browser mock' }),
+  bitbucketCheckConnection: async () => ({ success: false, error: 'Not available in browser mock' }),
+  bitbucketDetectRepo: async () => ({ success: true, data: null }),
   onRequirementsProgress: () => () => undefined,
   onRequirementsDone: () => () => undefined,
   onRequirementsError: () => () => undefined,
