@@ -1,0 +1,17 @@
+{
+  "settings": {
+    "enable": "Enable Bitbucket",
+    "enableHint": "Open pull requests on Bitbucket Cloud for finished tasks",
+    "email": "Atlassian account email",
+    "apiToken": "API token",
+    "apiTokenHint": "Create one at id.atlassian.com under Security, API tokens, scoped to Bitbucket",
+    "workspace": "Workspace",
+    "repoSlug": "Repository slug",
+    "detect": "Detect from remote",
+    "detectNone": "The origin remote is not a bitbucket.org repository",
+    "test": "Test connection",
+    "testing": "Testing…",
+    "connected": "Connected as {{name}}",
+    "connectedRepo": "Connected as {{name}}, repository {{repo}}"
+  }
+}

@@ -6,7 +6,11 @@
     "empty": "No BRDs yet. Create one to get started.",
     "warning": "Needs attention"
   },
-  "status": { "draft": "Draft", "review": "In review", "approved": "Approved" },
+  "status": {
+    "draft": "Draft",
+    "review": "In review",
+    "approved": "Approved"
+  },
   "newDialog": {
     "title": "New BRD",
     "description": "A Markdown file will be created under docs/brd from the template.",
@@ -61,16 +65,43 @@
     "generate": "Generate requirements",
     "notReady": "The BRD is not ready to split:",
     "running": "Generating…",
-    "phase": { "started": "Asking the model", "parsing": "Parsing the answer", "repairing": "Repairing the answer" },
-    "cancel": "Cancel",
-    "sections": { "requirements": "Requirements", "milestones": "Milestones", "tasks": "Tasks" },
-    "fields": {
-      "title": "Title", "description": "Description", "area": "Area", "acceptance": "Acceptance criteria",
-      "addCriterion": "Add criterion", "needsDesign": "Needs design", "included": "Included", "select": "Select for refinement",
-      "name": "Name", "category": "Category", "milestone": "Milestone", "requirements": "Covers", "moveUp": "Move up", "moveDown": "Move down"
+    "phase": {
+      "started": "Asking the model",
+      "parsing": "Parsing the answer",
+      "repairing": "Repairing the answer"
     },
-    "category": { "feature": "Feature", "bug": "Bug", "refactor": "Refactor", "docs": "Docs" },
-    "status": { "draft": "Draft", "approved": "Approved" },
+    "cancel": "Cancel",
+    "sections": {
+      "requirements": "Requirements",
+      "milestones": "Milestones",
+      "tasks": "Tasks"
+    },
+    "fields": {
+      "title": "Title",
+      "description": "Description",
+      "area": "Area",
+      "acceptance": "Acceptance criteria",
+      "addCriterion": "Add criterion",
+      "needsDesign": "Needs design",
+      "included": "Included",
+      "select": "Select for refinement",
+      "name": "Name",
+      "category": "Category",
+      "milestone": "Milestone",
+      "requirements": "Covers",
+      "moveUp": "Move up",
+      "moveDown": "Move down"
+    },
+    "category": {
+      "feature": "Feature",
+      "bug": "Bug",
+      "refactor": "Refactor",
+      "docs": "Docs"
+    },
+    "status": {
+      "draft": "Draft",
+      "approved": "Approved"
+    },
     "warnings": "Integrity warnings",
     "stale": "The BRD changed since this set was generated.",
     "regenerate": "Regenerate from BRD",
@@ -123,5 +154,25 @@
       "error": "Error"
     },
     "error": "Release failed: {{error}}"
+  },
+  "commit": {
+    "button": "Commit",
+    "title": "Commit BRD changes",
+    "description": "Commits changes under docs/brd on branch {{branch}}",
+    "message": "Commit message",
+    "push": "Push to origin",
+    "empty": "No changes under docs/brd",
+    "cancel": "Cancel",
+    "commit": "Commit",
+    "committing": "Committing…",
+    "done": "Committed {{commit}}",
+    "donePushed": "Committed {{commit}} and pushed",
+    "pushFailed": "Committed {{commit}}, but the push failed: {{error}}",
+    "status": {
+      "added": "Added",
+      "modified": "Modified",
+      "deleted": "Deleted",
+      "untracked": "New"
+    }
   }
 }

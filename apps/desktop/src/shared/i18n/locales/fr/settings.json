@@ -401,6 +401,13 @@
       "integrationDescription": "Publier les jalons et importer des tickets depuis Jira Cloud",
       "syncDescription": "Synchroniser avec Jira"
     },
+    "bitbucket": {
+      "title": "Bitbucket",
+      "description": "Pull requests Bitbucket Cloud",
+      "integrationTitle": "Intégration Bitbucket",
+      "integrationDescription": "Ouvrir des pull requests sur Bitbucket Cloud pour les tâches terminées",
+      "syncDescription": "Se connecter à Bitbucket"
+    },
     "skills": {
       "howToTitle": "Ajouter ou épingler des compétences",
       "howToLocal": "Ajoutez une compétence locale sous forme de dossier contenant un SKILL.md (name et description dans son en-tête) :",

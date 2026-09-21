@@ -7,6 +7,7 @@ import { LinearIntegration } from '../integrations/LinearIntegration';
 import { GitHubIntegration } from '../integrations/GitHubIntegration';
 import { GitLabIntegration } from '../integrations/GitLabIntegration';
 import { JiraIntegration } from '../integrations/JiraIntegration';
+import { BitbucketIntegration } from '../integrations/BitbucketIntegration';
 import { InitializationGuard } from '../common/InitializationGuard';
 import { SkillsSettings } from '../../project-settings/SkillsSettings';
 import type { ProjectSettingsSection } from '../ProjectSettingsContent';
@@ -183,6 +184,22 @@ export function SectionRouter({
             description={t('projectSections.jira.syncDescription')}
           >
             <JiraIntegration projectId={project.id} envConfig={envConfig} updateEnvConfig={updateEnvConfig} />
+          </InitializationGuard>
+        </SettingsSection>
+      );
+
+    case 'bitbucket':
+      return (
+        <SettingsSection
+          title={t('projectSections.bitbucket.integrationTitle')}
+          description={t('projectSections.bitbucket.integrationDescription')}
+        >
+          <InitializationGuard
+            initialized={!!project.autoBuildPath}
+            title={t('projectSections.bitbucket.integrationTitle')}
+            description={t('projectSections.bitbucket.syncDescription')}
+          >
+            <BitbucketIntegration projectId={project.id} envConfig={envConfig} updateEnvConfig={updateEnvConfig} />
           </InitializationGuard>
         </SettingsSection>
       );

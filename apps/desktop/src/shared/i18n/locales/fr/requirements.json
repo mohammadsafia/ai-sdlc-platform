@@ -6,7 +6,11 @@
     "empty": "Aucun BRD pour l'instant. Créez-en un pour commencer.",
     "warning": "À vérifier"
   },
-  "status": { "draft": "Brouillon", "review": "En relecture", "approved": "Approuvé" },
+  "status": {
+    "draft": "Brouillon",
+    "review": "En relecture",
+    "approved": "Approuvé"
+  },
   "newDialog": {
     "title": "Nouveau BRD",
     "description": "Un fichier Markdown sera créé sous docs/brd à partir du modèle.",
@@ -61,16 +65,43 @@
     "generate": "Générer les exigences",
     "notReady": "Le BRD n'est pas prêt à être découpé :",
     "running": "Génération…",
-    "phase": { "started": "Interrogation du modèle", "parsing": "Analyse de la réponse", "repairing": "Correction de la réponse" },
-    "cancel": "Annuler",
-    "sections": { "requirements": "Exigences", "milestones": "Jalons", "tasks": "Tâches" },
-    "fields": {
-      "title": "Titre", "description": "Description", "area": "Domaine", "acceptance": "Critères d'acceptation",
-      "addCriterion": "Ajouter un critère", "needsDesign": "Design requis", "included": "Inclus", "select": "Sélectionner pour l'affinage",
-      "name": "Nom", "category": "Catégorie", "milestone": "Jalon", "requirements": "Couvre", "moveUp": "Monter", "moveDown": "Descendre"
+    "phase": {
+      "started": "Interrogation du modèle",
+      "parsing": "Analyse de la réponse",
+      "repairing": "Correction de la réponse"
     },
-    "category": { "feature": "Fonctionnalité", "bug": "Bug", "refactor": "Refactorisation", "docs": "Docs" },
-    "status": { "draft": "Brouillon", "approved": "Approuvé" },
+    "cancel": "Annuler",
+    "sections": {
+      "requirements": "Exigences",
+      "milestones": "Jalons",
+      "tasks": "Tâches"
+    },
+    "fields": {
+      "title": "Titre",
+      "description": "Description",
+      "area": "Domaine",
+      "acceptance": "Critères d'acceptation",
+      "addCriterion": "Ajouter un critère",
+      "needsDesign": "Design requis",
+      "included": "Inclus",
+      "select": "Sélectionner pour l'affinage",
+      "name": "Nom",
+      "category": "Catégorie",
+      "milestone": "Jalon",
+      "requirements": "Couvre",
+      "moveUp": "Monter",
+      "moveDown": "Descendre"
+    },
+    "category": {
+      "feature": "Fonctionnalité",
+      "bug": "Bug",
+      "refactor": "Refactorisation",
+      "docs": "Docs"
+    },
+    "status": {
+      "draft": "Brouillon",
+      "approved": "Approuvé"
+    },
     "warnings": "Avertissements d'intégrité",
     "stale": "Le BRD a changé depuis la génération de cet ensemble.",
     "regenerate": "Régénérer depuis le BRD",
@@ -123,5 +154,25 @@
       "error": "Erreur"
     },
     "error": "Échec de la publication : {{error}}"
+  },
+  "commit": {
+    "button": "Valider",
+    "title": "Valider les modifications des BRD",
+    "description": "Valide les modifications sous docs/brd sur la branche {{branch}}",
+    "message": "Message de commit",
+    "push": "Pousser vers origin",
+    "empty": "Aucune modification sous docs/brd",
+    "cancel": "Annuler",
+    "commit": "Valider",
+    "committing": "Validation…",
+    "done": "Commit {{commit}} créé",
+    "donePushed": "Commit {{commit}} créé et poussé",
+    "pushFailed": "Commit {{commit}} créé, mais le push a échoué : {{error}}",
+    "status": {
+      "added": "Ajouté",
+      "modified": "Modifié",
+      "deleted": "Supprimé",
+      "untracked": "Nouveau"
+    }
   }
 }

@@ -1,0 +1,17 @@
+{
+  "settings": {
+    "enable": "Activer Bitbucket",
+    "enableHint": "Ouvrir des pull requests sur Bitbucket Cloud pour les tâches terminées",
+    "email": "E-mail du compte Atlassian",
+    "apiToken": "Jeton d'API",
+    "apiTokenHint": "Créez-en un sur id.atlassian.com, rubrique Sécurité, jetons d'API, avec l'accès Bitbucket",
+    "workspace": "Espace de travail",
+    "repoSlug": "Identifiant du dépôt",
+    "detect": "Détecter depuis le remote",
+    "detectNone": "Le remote origin n'est pas un dépôt bitbucket.org",
+    "test": "Tester la connexion",
+    "testing": "Test…",
+    "connected": "Connecté en tant que {{name}}",
+    "connectedRepo": "Connecté en tant que {{name}}, dépôt {{repo}}"
+  }
+}

@@ -401,6 +401,13 @@
       "integrationDescription": "Push milestones and import issues from Jira Cloud",
       "syncDescription": "Sync with Jira"
     },
+    "bitbucket": {
+      "title": "Bitbucket",
+      "description": "Bitbucket Cloud pull requests",
+      "integrationTitle": "Bitbucket Integration",
+      "integrationDescription": "Open pull requests on Bitbucket Cloud for finished tasks",
+      "syncDescription": "Connect to Bitbucket"
+    },
     "skills": {
       "howToTitle": "How to add or pin skills",
       "howToLocal": "Add a local skill as a folder with a SKILL.md (name and description in its frontmatter):",
