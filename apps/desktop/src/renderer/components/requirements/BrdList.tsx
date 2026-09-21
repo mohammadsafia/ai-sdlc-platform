@@ -21,15 +21,15 @@ interface BrdListProps {
 export function BrdList({ brds, selectedSlug, onSelect, onNew, changeCount, onCommit }: BrdListProps) {
   const { t } = useTranslation('requirements');
   return (
-    <div className="flex h-full flex-col border-r border-border">
-      <div className="flex items-center justify-between p-3">
-        <div>
+    <div className="flex h-full min-w-0 flex-col overflow-hidden border-r border-border">
+      <div className="space-y-2 p-3">
+        <div className="min-w-0">
           <h1 className="text-base font-semibold">{t('title')}</h1>
           <p className="text-xs text-muted-foreground">{t('subtitle')}</p>
         </div>
         <div className="flex items-center gap-2">
           {onCommit && (
-            <Button size="sm" variant="outline" onClick={onCommit} disabled={!changeCount}>
+            <Button size="sm" variant="outline" className="flex-1" onClick={onCommit} disabled={!changeCount}>
               <GitCommitHorizontal className="mr-1 h-4 w-4" />
               {t('commit.button')}
               {changeCount ? (
@@ -39,7 +39,7 @@ export function BrdList({ brds, selectedSlug, onSelect, onNew, changeCount, onCo
               ) : null}
             </Button>
           )}
-          <Button size="sm" onClick={onNew}>
+          <Button size="sm" className="flex-1" onClick={onNew}>
             <Plus className="mr-1 h-4 w-4" />
             {t('list.newBrd')}
           </Button>
