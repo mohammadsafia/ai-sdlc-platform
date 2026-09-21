@@ -1,4 +1,5 @@
 import { JIRA_ENV_KEYS, jiraEnvUpdates, readJiraEnv } from '../jira/env';
+import { BITBUCKET_ENV_KEYS, bitbucketEnvUpdates, readBitbucketEnv } from '../bitbucket/env';
 import { ipcMain } from 'electron';
 import type { BrowserWindow } from 'electron';
 import { IPC_CHANNELS, DEFAULT_APP_SETTINGS } from '../../shared/constants';
@@ -92,6 +93,8 @@ export function registerEnvHandlers(
     }
     // Jira Integration
     Object.assign(existingVars, jiraEnvUpdates(config));
+    // Bitbucket Integration
+    Object.assign(existingVars, bitbucketEnvUpdates(config));
     // Git/Worktree Settings
     if (config.defaultBranch !== undefined) {
       existingVars['DEFAULT_BRANCH'] = config.defaultBranch;
@@ -229,6 +232,15 @@ ${envLine(existingVars, JIRA_ENV_KEYS.EPIC_ISSUE_TYPE, 'Epic')}
 ${envLine(existingVars, JIRA_ENV_KEYS.STATUS_MAP, 'backlog:To Do;queue:To Do;in_progress:In Progress;ai_review:In Progress;human_review:In Progress;done:Done;pr_created:Done;error:')}
 
 # =============================================================================
+# BITBUCKET INTEGRATION (OPTIONAL, Bitbucket Cloud)
+# =============================================================================
+${existingVars[BITBUCKET_ENV_KEYS.ENABLED] !== undefined ? `${BITBUCKET_ENV_KEYS.ENABLED}=${existingVars[BITBUCKET_ENV_KEYS.ENABLED]}` : `# ${BITBUCKET_ENV_KEYS.ENABLED}=true`}
+${envLine(existingVars, BITBUCKET_ENV_KEYS.EMAIL)}
+${envLine(existingVars, BITBUCKET_ENV_KEYS.API_TOKEN)}
+${envLine(existingVars, BITBUCKET_ENV_KEYS.WORKSPACE, 'acme')}
+${envLine(existingVars, BITBUCKET_ENV_KEYS.REPO_SLUG, 'todo')}
+
+# =============================================================================
 # GIT/WORKTREE SETTINGS (OPTIONAL)
 # =============================================================================
 # Default base branch for worktree creation
@@ -340,6 +352,7 @@ ${existingVars['GRAPHITI_DB_PATH'] ? `GRAPHITI_DB_PATH=${existingVars['GRAPHITI_
         githubEnabled: false,
         gitlabEnabled: false,
         jiraEnabled: false,
+        bitbucketEnabled: false,
         memoryEnabled: false,
         enableFancyUi: true,
         openaiKeyIsGlobal: false
@@ -404,6 +417,9 @@ ${existingVars['GRAPHITI_DB_PATH'] ? `GRAPHITI_DB_PATH=${existingVars['GRAPHITI_
 
       // Jira config
       Object.assign(config, readJiraEnv(vars));
+
+      // Bitbucket config
+      Object.assign(config, readBitbucketEnv(vars));
 
       // Git/Worktree config
       if (vars['DEFAULT_BRANCH']) {

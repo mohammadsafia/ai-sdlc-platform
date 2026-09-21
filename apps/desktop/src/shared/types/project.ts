@@ -339,6 +339,12 @@ export interface ProjectEnvConfig {
   jiraIssueType?: string;     // default Task
   jiraEpicIssueType?: string; // default Epic
   jiraStatusMap?: JiraStatusMap;
+  // Bitbucket Integration (Bitbucket Cloud, API token)
+  bitbucketEnabled: boolean;
+  bitbucketEmail?: string;
+  bitbucketApiToken?: string;
+  bitbucketWorkspace?: string;  // acme
+  bitbucketRepoSlug?: string;   // todo
 
   // Git/Worktree Settings
   defaultBranch?: string; // Base branch for worktree creation (e.g., 'main', 'develop')
