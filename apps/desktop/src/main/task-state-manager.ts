@@ -1,3 +1,4 @@
+import { scheduleJiraSync } from './jira/status-sync';
 import { createActor } from 'xstate';
 import type { ActorRefFrom } from 'xstate';
 import type { BrowserWindow } from 'electron';
@@ -343,6 +344,7 @@ export class TaskStateManager {
       projectId,
       reviewReason
     );
+    if (projectId) scheduleJiraSync(projectId, taskId, status);
   }
 
   private isNewSequence(taskId: string, sequence: number): boolean {

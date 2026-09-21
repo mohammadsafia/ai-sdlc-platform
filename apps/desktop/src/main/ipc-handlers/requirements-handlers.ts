@@ -15,6 +15,8 @@ import { readBrd } from '../brd/brd-files';
 import { brdHash, readRequirements, writeRequirements } from '../brd/requirements-files';
 import { projectStore } from '../project-store';
 import { getActiveProviderFeatureSettings } from './feature-settings-helper';
+import { getJiraConfig } from '../jira/config';
+import { pushMilestoneToJira } from '../jira/push-milestone';
 import { createTaskInProject } from './task/create-task';
 import { safeSendToRenderer } from './utils';
 
@@ -170,7 +172,7 @@ export function registerRequirementsHandlers(getMainWindow: () => BrowserWindow 
 
   ipcMain.handle(
     IPC_CHANNELS.REQUIREMENTS_RELEASE,
-    async (_e, projectId: string, slug: string, milestoneId: string): Promise<IPCResult<{ set: RequirementsSet; tasks: Task[] }>> => {
+    async (_e, projectId: string, slug: string, milestoneId: string): Promise<IPCResult<{ set: RequirementsSet; tasks: Task[]; warnings: string[] }>> => {
       const project = projectStore.getProject(projectId);
       if (!project) return { success: false, error: `Project not found: ${projectId}` };
       const unlock = tryAcquireSlugLock(projectId, slug);
@@ -204,7 +206,18 @@ export function registerRequirementsHandlers(getMainWindow: () => BrowserWindow 
             return { success: false, error: `Tasks ${ids} were created but the release record could not be saved: ${err instanceof Error ? err.message : String(err)}` };
           }
         }
-        return { success: true, data: { set: current, tasks: created } };
+        const warnings: string[] = [];
+        if (created.length > 0 && getJiraConfig(project)) {
+          try {
+            // The lock is already held by this handler; push reads and writes the set file directly.
+            const pushed = await pushMilestoneToJira(project, slug, milestoneId);
+            current = pushed.set;
+            warnings.push(...pushed.warnings);
+          } catch (err) {
+            warnings.push(`Jira push failed: ${err instanceof Error ? err.message : String(err)}`);
+          }
+        }
+        return { success: true, data: { set: current, tasks: created, warnings } };
       } catch (err) {
         return fail(err);
       } finally {

@@ -25,6 +25,8 @@ interface RequirementsState {
   isLoading: boolean;
   isSaving: boolean;
   isReleasing: boolean;
+  isPushing: boolean;
+  releaseWarnings: string[];
   error: string | null;
 
   isDirty: () => boolean;
@@ -34,6 +36,7 @@ interface RequirementsState {
   nextMilestone: () => Milestone | null;
   releaseReason: (milestoneId: string) => ReleaseGateReason | 'running' | null;
   release: (projectId: string, milestoneId: string) => Promise<void>;
+  pushToJira: (projectId: string, milestoneId: string) => Promise<void>;
   reset: () => void;
   load: (projectId: string, slug: string) => Promise<void>;
   /** Re-read the BRD hash after the document was saved, keeping the set and any local edits. */
@@ -64,6 +67,8 @@ const initial = {
   isLoading: false,
   isSaving: false,
   isReleasing: false,
+  isPushing: false,
+  releaseWarnings: [] as string[],
   error: null as string | null,
 };
 
@@ -131,12 +136,25 @@ export const useRequirementsStore = create<RequirementsState>((set, get) => {
       if (!result.success || !result.data) {
         // Reload first (a partial record may exist on disk), then surface the error, because load clears it.
         await get().load(projectId, slug);
-        set({ error: result.error ?? 'Unknown error', isReleasing: false });
+        set({ error: result.error ?? 'Unknown error', isReleasing: false, releaseWarnings: [] });
         return;
       }
       for (const task of result.data.tasks) useTaskStore.getState().addTask(task);
       const next = result.data.set;
-      set({ set: next, savedSet: next, warnings: validateRequirementsSet(next), isReleasing: false });
+      set({ set: next, savedSet: next, warnings: validateRequirementsSet(next), isReleasing: false, releaseWarnings: result.data.warnings ?? [] });
+    },
+
+    pushToJira: async (projectId, milestoneId) => {
+      const { slug } = get();
+      if (!slug) return;
+      set({ isPushing: true, error: null });
+      const result = await window.electronAPI.jiraPushMilestone(projectId, slug, milestoneId);
+      if (!result.success || !result.data) {
+        set({ error: result.error ?? 'Unknown error', isPushing: false });
+        return;
+      }
+      const next = result.data.set;
+      set({ set: next, savedSet: next, warnings: validateRequirementsSet(next), releaseWarnings: result.data.warnings, isPushing: false });
     },
 
     reset: () => set({ ...initial, run: { ...idle } }),

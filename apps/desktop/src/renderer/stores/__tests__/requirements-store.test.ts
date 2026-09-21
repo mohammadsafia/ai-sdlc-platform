@@ -8,7 +8,7 @@ vi.mock('../task-store', () => ({ useTaskStore: { getState: () => ({ addTask }) 
 
 const api = {
   requirementsRead: vi.fn(), requirementsWrite: vi.fn(), requirementsApprove: vi.fn(),
-  requirementsGenerate: vi.fn(), requirementsCancel: vi.fn(), requirementsRelease: vi.fn(),
+  requirementsGenerate: vi.fn(), requirementsCancel: vi.fn(), requirementsRelease: vi.fn(), jiraPushMilestone: vi.fn(),
   onRequirementsProgress: vi.fn(), onRequirementsDone: vi.fn(), onRequirementsError: vi.fn(),
 };
 let progressCb: (p: { runId: string; phase: string }) => void = () => {};
@@ -182,5 +182,20 @@ describe('requirements-store', () => {
     useRequirementsStore.getState().toggleSelect('M2');
     await useRequirementsStore.getState().refine('p1', 'again');
     expect(api.requirementsGenerate).toHaveBeenLastCalledWith('p1', { slug: 'a', mode: 'refine', feedback: 'again', selection: ['M2'] });
+  });
+  it('release keeps warnings and pushToJira installs the returned set', async () => {
+    api.requirementsRead.mockResolvedValue({ success: true, data: { set: approved, currentBrdHash: 'H' } });
+    await useRequirementsStore.getState().load('p1', 'a');
+    api.requirementsRelease.mockResolvedValue({ success: true, data: { set: released, tasks: [], warnings: ['Jira push failed: x'] } });
+    await useRequirementsStore.getState().release('p1', 'M1');
+    expect(useRequirementsStore.getState().releaseWarnings).toEqual(['Jira push failed: x']);
+    const pushed = { ...released, releases: { M1: { ...released.releases!.M1, jira: { epicKey: 'ACME-1', issues: { T1: 'ACME-2' }, pushedAt: 't' } } } };
+    api.jiraPushMilestone.mockResolvedValue({ success: true, data: { set: pushed, warnings: [] } });
+    await useRequirementsStore.getState().pushToJira('p1', 'M1');
+    expect(api.jiraPushMilestone).toHaveBeenCalledWith('p1', 'a', 'M1');
+    const s = useRequirementsStore.getState();
+    expect(s.set?.releases?.M1.jira?.epicKey).toBe('ACME-1');
+    expect(s.releaseWarnings).toEqual([]);
+    expect(s.isPushing).toBe(false);
   });
 });

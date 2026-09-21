@@ -17,7 +17,7 @@ interface RequirementsTabProps {
 export function RequirementsTab({ projectId, brdReady, missingSections }: RequirementsTabProps) {
   const { t } = useTranslation('requirements');
   const store = useRequirementsStore();
-  const { set, warnings, run, isSaving, error, generate, regenerate, cancel, save, approve } = store;
+  const { set, warnings, run, isSaving, error, releaseWarnings, generate, regenerate, cancel, save, approve } = store;
   const dirty = useRequirementsStore((s) => JSON.stringify(s.set) !== JSON.stringify(s.savedSet));
   const stale = useRequirementsStore((s) => !!s.set && s.set.brdHash !== s.currentBrdHash);
   const canApprove = !!set && set.status !== 'approved' && !dirty && warnings.length === 0;
@@ -59,6 +59,9 @@ export function RequirementsTab({ projectId, brdReady, missingSections }: Requir
         </div>
       )}
       {(error || run.error) && <p className="text-xs text-destructive">{t('set.error', { error: error ?? run.error })}</p>}
+      {releaseWarnings.length > 0 && (
+        <ul className="list-disc pl-5 text-xs text-amber-600">{releaseWarnings.map((w) => <li key={w}>{w}</li>)}</ul>
+      )}
 
       <div className="min-h-0 flex-1 overflow-auto pr-1">
         <RequirementsSetEditor projectId={projectId} />

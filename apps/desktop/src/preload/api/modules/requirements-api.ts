@@ -12,7 +12,7 @@ export interface RequirementsAPI {
   requirementsApprove: (projectId: string, slug: string, set: RequirementsSet) => Promise<IPCResult<RequirementsSet>>;
   requirementsGenerate: (projectId: string, request: RequirementsGenerateRequest) => Promise<IPCResult<{ runId: string }>>;
   requirementsCancel: (runId: string) => Promise<IPCResult>;
-  requirementsRelease: (projectId: string, slug: string, milestoneId: string) => Promise<IPCResult<{ set: RequirementsSet; tasks: Task[] }>>;
+  requirementsRelease: (projectId: string, slug: string, milestoneId: string) => Promise<IPCResult<{ set: RequirementsSet; tasks: Task[]; warnings: string[] }>>;
   onRequirementsProgress: (callback: (p: RequirementsProgress) => void) => IpcListenerCleanup;
   onRequirementsDone: (callback: (d: RequirementsDone) => void) => IpcListenerCleanup;
   onRequirementsError: (callback: (e: RequirementsError) => void) => IpcListenerCleanup;

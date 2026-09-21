@@ -3,6 +3,7 @@ import { TaskStateManager } from '../task-state-manager';
 import type { Task, Project } from '../../shared/types';
 
 // Mock dependencies
+vi.mock('../jira/status-sync', () => ({ scheduleJiraSync: vi.fn() }));
 vi.mock('../ipc-handlers/utils', () => ({
   safeSendToRenderer: vi.fn()
 }));

@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { RequirementsSet } from '../../../shared/types/requirements';
 
-const { handlers, sent, getProject, files, brd, run, featureSettings, createTask } = vi.hoisted(() => ({
+const { handlers, sent, getProject, files, brd, run, featureSettings, createTask, jiraPush, jiraCfg } = vi.hoisted(() => ({
   handlers: new Map<string, (...args: unknown[]) => unknown>(),
   sent: [] as unknown[][],
   getProject: vi.fn(),
@@ -11,6 +11,8 @@ const { handlers, sent, getProject, files, brd, run, featureSettings, createTask
   run: vi.fn(),
   featureSettings: vi.fn(() => ({ model: 'sonnet', thinkingLevel: 'medium' })),
   createTask: vi.fn(),
+  jiraPush: { pushMilestoneToJira: vi.fn() },
+  jiraCfg: { getJiraConfig: vi.fn(() => null as unknown) },
 }));
 vi.mock('electron', () => ({ ipcMain: { handle: vi.fn((c: string, fn: (...a: unknown[]) => unknown) => handlers.set(c, fn)) } }));
 vi.mock('../utils', () => ({ safeSendToRenderer: vi.fn((_g: unknown, ...args: unknown[]) => { sent.push(args); return true; }) }));
@@ -20,6 +22,8 @@ vi.mock('../../brd/brd-files', () => brd);
 vi.mock('../../ai/runners/requirements-generator', () => ({ runRequirementsGenerator: run }));
 vi.mock('../feature-settings-helper', () => ({ getActiveProviderFeatureSettings: featureSettings }));
 vi.mock('../task/create-task', () => ({ createTaskInProject: createTask }));
+vi.mock('../../jira/push-milestone', () => jiraPush);
+vi.mock('../../jira/config', () => jiraCfg);
 
 import { registerRequirementsHandlers } from '../requirements-handlers';
 
@@ -178,6 +182,28 @@ describe('requirements handlers', () => {
     expect(g).toMatchObject({ success: true });
     const r = await handlers.get('requirements:release')!({}, 'p1', 'a', 'M1');
     expect(r).toEqual({ success: false, error: 'A run is already in progress for this BRD' });
+    // Release the lock so later tests start clean
+    await handlers.get('requirements:cancel')!({}, (g as { data: { runId: string } }).data.runId);
     await tick();
+  });
+  it('release pushes to Jira when configured and turns push failures into warnings', async () => {
+    files.readRequirements.mockResolvedValue(approved);
+    files.writeRequirements.mockImplementation(async (_p: string, _s: string, s: RequirementsSet) => s);
+    createTask.mockReturnValueOnce(madeTask('001-t'));
+    jiraCfg.getJiraConfig.mockReturnValueOnce({ projectKey: 'ACME' });
+    jiraPush.pushMilestoneToJira.mockRejectedValueOnce(new Error('Jira down'));
+    const r = (await handlers.get('requirements:release')!({}, 'p1', 'a', 'M1')) as { success: boolean; data: { warnings: string[]; set: RequirementsSet } };
+    expect(r.success).toBe(true);
+    expect(r.data.warnings).toEqual(['Jira push failed: Jira down']);
+    expect(r.data.set.releases?.M1.tasks).toHaveLength(1);
+  });
+
+  it('release without Jira returns no warnings', async () => {
+    files.readRequirements.mockResolvedValue(approved);
+    files.writeRequirements.mockImplementation(async (_p: string, _s: string, s: RequirementsSet) => s);
+    createTask.mockReturnValueOnce(madeTask('001-t'));
+    const r = (await handlers.get('requirements:release')!({}, 'p1', 'a', 'M1')) as { data: { warnings: string[] } };
+    expect(r.data.warnings).toEqual([]);
+    expect(jiraPush.pushMilestoneToJira).not.toHaveBeenCalled();
   });
 });
