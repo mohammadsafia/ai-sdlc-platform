@@ -69,9 +69,13 @@ describe('design-store', () => {
   it('setStatus updates the brief list and the selected summary', async () => {
     useDesignStore.setState({ briefs: [summary], selected: { brdSlug: 'a', requirementId: 'R1' }, selectedSummary: summary });
     api.designSetStatus.mockResolvedValue({ success: true, data: { ...summary, status: 'approved' } });
+    const approvedDoc = doc.replace('status: draft', 'status: approved');
+    api.designRead.mockResolvedValue({ success: true, data: { summary: { ...summary, status: 'approved' }, content: approvedDoc } });
     await useDesignStore.getState().setStatus('p1', 'approved');
     expect(useDesignStore.getState().briefs[0].status).toBe('approved');
     expect(useDesignStore.getState().selectedSummary?.status).toBe('approved');
+    expect(useDesignStore.getState().content).toBe(approvedDoc);
+    expect(useDesignStore.getState().isDirty()).toBe(false);
   });
 
   it('draft streams into a proposal; accept creates the file when none exists', async () => {

@@ -168,6 +168,11 @@ export const useDesignStore = create<DesignState>((set, get) => ({
     }
     const summary = result.data;
     set((s) => ({ briefs: upsert(s.briefs, summary), selectedSummary: summary }));
+    // The file's frontmatter changed on disk; reload it so the editor matches.
+    const reread = await window.electronAPI.designRead(projectId, selected.brdSlug, selected.requirementId);
+    if (reread.success && reread.data) {
+      set({ content: reread.data.content, savedContent: reread.data.content, structure: checkDesignStructure(reread.data.content) });
+    }
     void useBrdStore.getState().refreshChanges(projectId);
   },
 

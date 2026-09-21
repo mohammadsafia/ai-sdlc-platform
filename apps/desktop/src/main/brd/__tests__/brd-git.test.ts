@@ -28,7 +28,7 @@ describe('brdChanges', () => {
   it('returns the branch and files scoped to docs/brd', () => {
     execFileSync.mockReturnValueOnce('true\n').mockReturnValueOnce('develop\n').mockReturnValueOnce(' M docs/brd/a.md\n');
     expect(brdChanges('/repo', 'git')).toEqual({ branch: 'develop', files: [{ path: 'docs/brd/a.md', status: 'modified' }] });
-    expect(calls()[2]).toBe('status --porcelain -- docs/brd docs/design');
+    expect(calls()[2]).toBe('status --porcelain --untracked-files=all -- docs/brd docs/design');
   });
 
   it('throws when not a git repository', () => {

@@ -45,7 +45,7 @@ export function parsePorcelain(output: string): BrdChangedFile[] {
 export function brdChanges(projectDir: string, gitPath: string = getToolPath('git')): BrdChanges {
   assertRepo(gitPath, projectDir);
   const branch = git(gitPath, projectDir, ['rev-parse', '--abbrev-ref', 'HEAD']).trim();
-  const files = parsePorcelain(git(gitPath, projectDir, ['status', '--porcelain', '--', ...BRD_PATHSPECS]));
+  const files = parsePorcelain(git(gitPath, projectDir, ['status', '--porcelain', '--untracked-files=all', '--', ...BRD_PATHSPECS]));
   return { branch, files };
 }
 
