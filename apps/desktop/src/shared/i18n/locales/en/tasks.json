@@ -366,6 +366,7 @@
     "brd": "BRD",
     "openBrd": "Open in Requirements",
     "milestone": "Milestone",
-    "covers": "Covers"
+    "covers": "Covers",
+    "design": "Design"
   }
 }

@@ -1,0 +1,54 @@
+{
+  "view": {
+    "title": "Design",
+    "subtitle": "Briefs de design pour les exigences qui en ont besoin"
+  },
+  "list": {
+    "empty": "Aucune exigence ne nécessite de design pour l'instant.",
+    "noSets": "Générez d'abord les exigences d'un BRD."
+  },
+  "status": {
+    "none": "Pas de brief",
+    "draft": "Brouillon",
+    "approved": "Approuvé"
+  },
+  "empty": {
+    "title": "Pas encore de brief pour {{id}}",
+    "acceptance": "Critères d'acceptation",
+    "notes": "Notes pour l'agent designer",
+    "notesPlaceholder": "Contraintes, références et tout ce que le brief doit respecter.",
+    "createFromTemplate": "Créer depuis le modèle",
+    "draftWithAi": "Rédiger avec l'IA"
+  },
+  "editor": {
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "saved": "Enregistré",
+    "unsaved": "Modifications non enregistrées",
+    "approve": "Approuver",
+    "unapprove": "Retirer l'approbation",
+    "markdown": "Markdown",
+    "preview": "Aperçu",
+    "loadError": "Impossible de charger ce brief : {{error}}",
+    "saveError": "Impossible d'enregistrer : {{error}}",
+    "requirement": "Exigence"
+  },
+  "assist": {
+    "title": "Assistant IA",
+    "notesLabel": "Instructions",
+    "notesPlaceholder": "Décrivez ce qu'il faut changer, par exemple : ajouter une mise en page mobile pour la liste.",
+    "revise": "Réviser selon les instructions",
+    "streaming": "Rédaction…",
+    "cancel": "Annuler",
+    "proposalTitle": "Brief proposé",
+    "accept": "Accepter dans l'éditeur",
+    "discard": "Rejeter",
+    "error": "L'assistant a échoué : {{error}}"
+  },
+  "unsavedDialog": {
+    "title": "Abandonner les modifications ?",
+    "description": "Le brief en cours a des modifications non enregistrées. Changer de brief les perdra.",
+    "discard": "Abandonner",
+    "cancel": "Continuer l'édition"
+  }
+}

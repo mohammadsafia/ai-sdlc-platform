@@ -124,7 +124,8 @@
       "discard": "Discard",
       "error": "Refinement failed: {{error}}"
     },
-    "error": "Something went wrong: {{error}}"
+    "error": "Something went wrong: {{error}}",
+    "designChip": "Design"
   },
   "release": {
     "button": "Release milestone",

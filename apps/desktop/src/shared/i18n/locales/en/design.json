@@ -1,0 +1,54 @@
+{
+  "view": {
+    "title": "Design",
+    "subtitle": "Design briefs for requirements that need design"
+  },
+  "list": {
+    "empty": "No requirements need design yet.",
+    "noSets": "Generate requirements for a BRD first."
+  },
+  "status": {
+    "none": "No brief",
+    "draft": "Draft",
+    "approved": "Approved"
+  },
+  "empty": {
+    "title": "No brief for {{id}} yet",
+    "acceptance": "Acceptance criteria",
+    "notes": "Notes for the designer agent",
+    "notesPlaceholder": "Constraints, references, and anything the brief must respect.",
+    "createFromTemplate": "Create from template",
+    "draftWithAi": "Draft with AI"
+  },
+  "editor": {
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "unsaved": "Unsaved changes",
+    "approve": "Approve",
+    "unapprove": "Unapprove",
+    "markdown": "Markdown",
+    "preview": "Preview",
+    "loadError": "Could not load this brief: {{error}}",
+    "saveError": "Could not save: {{error}}",
+    "requirement": "Requirement"
+  },
+  "assist": {
+    "title": "AI assist",
+    "notesLabel": "Instructions",
+    "notesPlaceholder": "Describe what to change, for example: add a mobile layout for the list.",
+    "revise": "Revise with instructions",
+    "streaming": "Writing…",
+    "cancel": "Cancel",
+    "proposalTitle": "Proposed brief",
+    "accept": "Accept into editor",
+    "discard": "Discard",
+    "error": "The assistant failed: {{error}}"
+  },
+  "unsavedDialog": {
+    "title": "Discard unsaved changes?",
+    "description": "You have unsaved changes in the current brief. Switching will discard them.",
+    "discard": "Discard changes",
+    "cancel": "Keep editing"
+  }
+}

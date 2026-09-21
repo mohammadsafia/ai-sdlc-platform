@@ -124,7 +124,8 @@
       "discard": "Rejeter",
       "error": "L'affinage a échoué : {{error}}"
     },
-    "error": "Une erreur est survenue : {{error}}"
+    "error": "Une erreur est survenue : {{error}}",
+    "designChip": "Design"
   },
   "release": {
     "button": "Publier le jalon",
