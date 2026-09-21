@@ -21,7 +21,8 @@ import {
   GitBranch,
   Wrench,
   PanelLeft,
-  PanelLeftClose
+  PanelLeftClose,
+  Ticket
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
@@ -59,7 +60,7 @@ import { RateLimitIndicator } from './RateLimitIndicator';
 import { UpdateBanner } from './UpdateBanner';
 import type { Project, GitStatus } from '../../shared/types';
 
-export type SidebarView = 'kanban' | 'terminals' | 'roadmap' | 'context' | 'ideation' | 'github-issues' | 'gitlab-issues' | 'github-prs' | 'gitlab-merge-requests' | 'changelog' | 'insights' | 'worktrees' | 'agent-tools' | 'requirements';
+export type SidebarView = 'kanban' | 'terminals' | 'roadmap' | 'context' | 'ideation' | 'github-issues' | 'gitlab-issues' | 'github-prs' | 'gitlab-merge-requests' | 'changelog' | 'insights' | 'worktrees' | 'agent-tools' | 'requirements' | 'jira-issues';
 
 interface SidebarProps {
   onSettingsClick: () => void;
@@ -101,6 +102,11 @@ const gitlabNavItems: NavItem[] = [
   { id: 'gitlab-merge-requests', labelKey: 'navigation:items.gitlabMRs', icon: GitMerge, shortcut: 'R' }
 ];
 
+// Jira nav items shown when Jira is enabled
+const jiraNavItems: NavItem[] = [
+  { id: 'jira-issues', labelKey: 'navigation:items.jiraIssues', icon: Ticket, shortcut: 'J' }
+];
+
 export function Sidebar({
   onSettingsClick,
   onNewTaskClick,
@@ -131,6 +137,7 @@ export function Sidebar({
   // Subscribe to project-env-store for reactive GitHub/GitLab tab visibility
   const githubEnabled = useProjectEnvStore((state) => state.envConfig?.githubEnabled ?? false);
   const gitlabEnabled = useProjectEnvStore((state) => state.envConfig?.gitlabEnabled ?? false);
+  const jiraEnabled = useProjectEnvStore((state) => state.envConfig?.jiraEnabled ?? false);
 
   // Track the last loaded project ID to avoid redundant loads
   const lastLoadedProjectIdRef = useRef<string | null>(null);
@@ -147,8 +154,12 @@ export function Sidebar({
       items.push(...gitlabNavItems);
     }
 
+    if (jiraEnabled) {
+      items.push(...jiraNavItems);
+    }
+
     return items;
-  }, [githubEnabled, gitlabEnabled]);
+  }, [githubEnabled, gitlabEnabled, jiraEnabled]);
 
   // Load envConfig when project changes to ensure store is populated
   useEffect(() => {

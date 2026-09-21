@@ -42,6 +42,7 @@ import { Insights } from './components/Insights';
 import { ErrorBoundary } from './components/ui/error-boundary';
 import { GitHubIssues } from './components/GitHubIssues';
 import { GitLabIssues } from './components/GitLabIssues';
+import { JiraIssues } from './components/JiraIssues';
 import { GitHubPRs } from './components/github-prs';
 import { GitLabMergeRequests } from './components/gitlab-merge-requests';
 import { Changelog } from './components/Changelog';
@@ -930,6 +931,14 @@ export function App() {
                       setIsSettingsDialogOpen(true);
                     }}
                     onNavigateToTask={handleGoToTask}
+                  />
+                )}
+                {activeView === 'jira-issues' && (activeProjectId || selectedProjectId) && (
+                  <JiraIssues
+                    onOpenSettings={() => {
+                      setSettingsInitialProjectSection('jira');
+                      setIsSettingsDialogOpen(true);
+                    }}
                   />
                 )}
                 {/* GitHubPRs is always mounted but hidden when not active to preserve review state */}
