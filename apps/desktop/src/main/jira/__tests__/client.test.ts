@@ -1,6 +1,6 @@
 // apps/desktop/src/main/jira/__tests__/client.test.ts
 import { describe, it, expect, vi } from 'vitest';
-import { JiraApiError, JiraClient } from '../client';
+import { JiraApiError, JiraClient, extractJiraError } from '../client';
 
 const json = (status: number, body: unknown, headers: Record<string, string> = {}) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', ...headers } });
@@ -18,6 +18,7 @@ describe('JiraClient', () => {
     expect(url).toBe('https://acme.atlassian.net/rest/api/3/myself');
     expect(new Headers(init.headers).get('authorization')).toBe(`Basic ${Buffer.from('a@b.c:tok').toString('base64')}`);
     expect(new Headers(init.headers).get('accept')).toBe('application/json');
+    expect(new Headers(init.headers).get('accept-language')).toBe('en');
   });
 
   it('throws JiraApiError with Jira messages on non-2xx', async () => {
@@ -64,5 +65,19 @@ describe('JiraClient', () => {
     expect(body).toMatchObject({ jql: 'project = ACME', nextPageToken: 'p2', maxResults: 50 });
     expect(body.fields).toContain('summary');
     expect(c.browseUrl('ACME-1')).toBe('https://acme.atlassian.net/browse/ACME-1');
+  });
+});
+
+describe('extractJiraError', () => {
+  it('joins errorMessages and field errors', () => {
+    expect(extractJiraError(400, { errorMessages: ['Bad'], errors: { summary: 'Required' } })).toBe('Bad; summary: Required');
+  });
+
+  it('drops a field error that repeats a top-level message', () => {
+    expect(extractJiraError(400, { errorMessages: ['No project'], errors: { project: 'No project', summary: 'Required' } })).toBe('No project; summary: Required');
+  });
+
+  it('falls back to the HTTP status', () => {
+    expect(extractJiraError(502, 'gateway')).toBe('Jira request failed with HTTP 502');
   });
 });

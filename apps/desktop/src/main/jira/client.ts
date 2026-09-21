@@ -35,10 +35,16 @@ export function extractJiraError(status: number, body: unknown): string {
   if (body && typeof body === 'object') {
     const b = body as { errorMessages?: unknown; errors?: unknown; message?: unknown };
     if (Array.isArray(b.errorMessages)) parts.push(...b.errorMessages.map(String));
-    if (b.errors && typeof b.errors === 'object') for (const [k, v] of Object.entries(b.errors as Record<string, unknown>)) parts.push(`${k}: ${String(v)}`);
-    if (typeof b.message === 'string') parts.push(b.message);
+    if (b.errors && typeof b.errors === 'object') {
+      for (const [k, v] of Object.entries(b.errors as Record<string, unknown>)) {
+        // Jira often repeats the same text in errorMessages and errors.<field>; keep it once.
+        if (!parts.includes(String(v))) parts.push(`${k}: ${String(v)}`);
+      }
+    }
+    if (typeof b.message === 'string' && !parts.includes(b.message)) parts.push(b.message);
   }
-  return parts.length > 0 ? parts.join('; ') : `Jira request failed with HTTP ${status}`;
+  const unique = Array.from(new Set(parts));
+  return unique.length > 0 ? unique.join('; ') : `Jira request failed with HTTP ${status}`;
 }
 
 export class JiraClient {
@@ -58,6 +64,7 @@ export class JiraClient {
     const headers: Record<string, string> = {
       Authorization: `Basic ${Buffer.from(`${this.cfg.email}:${this.cfg.apiToken}`).toString('base64')}`,
       Accept: 'application/json',
+      'Accept-Language': 'en',
       'User-Agent': 'Appswave',
     };
     if (body !== undefined) headers['Content-Type'] = 'application/json';
