@@ -53,6 +53,9 @@ export const GeneratedBodySchema = z.object({
   changeSummary: z.string().nullable(),
 });
 
+const releasedTaskSchema = z.object({ proposedTaskId: idSchema, specId: z.string().min(1) });
+const milestoneReleaseSchema = z.object({ releasedAt: z.string().min(1), tasks: z.array(releasedTaskSchema) });
+
 export const RequirementsSetSchema = z.object({
   version: z.literal(1),
   brdSlug: z.string().min(1),
@@ -63,6 +66,7 @@ export const RequirementsSetSchema = z.object({
   requirements: z.array(requirementBody.extend({ id: idSchema, included: z.boolean() })),
   milestones: z.array(milestoneBody.extend({ id: idSchema, included: z.boolean(), order: orderStored })),
   tasks: z.array(taskBody.extend({ id: idSchema, included: z.boolean(), order: orderStored })),
+  releases: z.record(z.string(), milestoneReleaseSchema).optional(),
 });
 
 export function nextId(prefix: 'R' | 'M' | 'T', existing: Array<{ id: string }>): string {
@@ -209,6 +213,7 @@ export function mergeRefinement(
     requirements,
     milestones,
     tasks,
+    ...(previous.releases ? { releases: previous.releases } : {}),
   };
   return { set, warnings };
 }

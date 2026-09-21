@@ -32,6 +32,18 @@ export interface ProposedTask {
   included: boolean;
 }
 
+/** One Kanban task created from a proposed task. */
+export interface ReleasedTask {
+  proposedTaskId: string;   // "T3"
+  specId: string;           // Kanban task id and spec directory name
+}
+
+/** Release record for one milestone; may be partial after a failure midway. */
+export interface MilestoneRelease {
+  releasedAt: string;       // ISO, first successful task creation
+  tasks: ReleasedTask[];
+}
+
 export interface RequirementsSet {
   version: 1;
   brdSlug: string;
@@ -42,6 +54,8 @@ export interface RequirementsSet {
   requirements: Requirement[];
   milestones: Milestone[];
   tasks: ProposedTask[];
+  /** Keyed by milestone id. Absent until the first release. */
+  releases?: Record<string, MilestoneRelease>;
 }
 
 /** Model output before post-processing. Ids are null for new items and echoed back during refinement. */

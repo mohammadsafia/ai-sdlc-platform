@@ -180,7 +180,12 @@ export type TaskCategory =
 
 export interface TaskMetadata {
   // Origin tracking
-  sourceType?: 'ideation' | 'manual' | 'imported' | 'insights' | 'roadmap' | 'linear' | 'github' | 'gitlab';
+  sourceType?: 'ideation' | 'manual' | 'imported' | 'insights' | 'roadmap' | 'linear' | 'github' | 'gitlab' | 'requirements';
+  // Requirements set links (sourceType 'requirements')
+  brdSlug?: string;          // docs/brd/<slug>.md
+  milestoneId?: string;      // "M1"
+  requirementIds?: string[]; // ["R1", "R4"]
+  proposedTaskId?: string;   // "T3"
   ideationType?: string;  // e.g., 'code_improvements', 'security_hardening'
   ideaId?: string;  // Reference to original idea if converted
   featureId?: string;  // Reference to roadmap feature if from roadmap

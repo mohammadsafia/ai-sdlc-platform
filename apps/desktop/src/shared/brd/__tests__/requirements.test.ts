@@ -186,3 +186,29 @@ describe('diffSets', () => {
     });
   });
 });
+
+describe('releases', () => {
+  const releases = { M1: { releasedAt: '2026-09-21T00:00:00.000Z', tasks: [{ proposedTaskId: 'T1', specId: '001-task-t1' }] } };
+
+  it('RequirementsSetSchema accepts a set with releases and one without', () => {
+    expect(RequirementsSetSchema.safeParse(set()).success).toBe(true);
+    expect(RequirementsSetSchema.safeParse(set({ releases })).success).toBe(true);
+  });
+
+  it('RequirementsSetSchema rejects a release entry with a bad proposed task id', () => {
+    const bad = { M1: { releasedAt: 't', tasks: [{ proposedTaskId: 'X1', specId: 's' }] } };
+    expect(RequirementsSetSchema.safeParse(set({ releases: bad as never })).success).toBe(false);
+  });
+
+  it('mergeRefinement carries releases over from previous', () => {
+    const previous = set({ releases });
+    const body: GeneratedBody = {
+      requirements: [{ id: 'R1', title: 'r', description: 'd', acceptanceCriteria: ['x'], area: 'A', needsDesign: false }],
+      milestones: [{ id: 'M1', name: 'm', description: 'd', order: 1 }],
+      tasks: [{ id: 'T1', title: 't', description: 'd', milestoneId: 'M1', requirementIds: ['R1'], category: 'feature', order: 1 }],
+      changeSummary: null,
+    };
+    expect(mergeRefinement(previous, body).set.releases).toEqual(releases);
+    expect(mergeRefinement(set(), body).set.releases).toBeUndefined();
+  });
+});
