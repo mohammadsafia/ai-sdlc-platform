@@ -50,3 +50,9 @@ export interface BrdDraftRequest {
 export interface BrdDraftChunk { runId: string; text: string }
 export interface BrdDraftDone { runId: string; text: string }
 export interface BrdDraftError { runId: string; error: string }
+
+/** Git state of docs/brd (see main/brd/brd-git.ts). */
+export type BrdFileStatus = 'added' | 'modified' | 'deleted' | 'untracked';
+export interface BrdChangedFile { path: string; status: BrdFileStatus }
+export interface BrdChanges { branch: string; files: BrdChangedFile[] }
+export interface BrdCommitResult { commit: string; pushed: boolean; pushError?: string }

@@ -25,6 +25,8 @@ export const IPC_CHANNELS = {
   BRD_DRAFT_CHUNK: 'brd:draft-chunk',
   BRD_DRAFT_DONE: 'brd:draft-done',
   BRD_DRAFT_ERROR: 'brd:draft-error',
+  BRD_CHANGES: 'brd:changes',
+  BRD_COMMIT: 'brd:commit',
 
   // Requirements set
   REQUIREMENTS_READ: 'requirements:read',

@@ -235,6 +235,8 @@ const browserMockAPI: ElectronAPI = {
   brdCreate: async () => ({ success: false, error: 'Not available in browser mock' }),
   brdDraft: async () => ({ success: false, error: 'Not available in browser mock' }),
   brdDraftCancel: async () => ({ success: false, error: 'Not available in browser mock' }),
+  brdChanges: async () => ({ success: true, data: { branch: 'main', files: [] } }),
+  brdCommit: async () => ({ success: false, error: 'Not available in browser mock' }),
   onBrdDraftChunk: () => () => {},
   onBrdDraftDone: () => () => {},
   onBrdDraftError: () => () => {},

@@ -107,7 +107,7 @@ import type {
   InsightsStreamChunk,
   InsightsModelConfig
 } from './insights';
-import type { BrdDraftChunk, BrdDraftDone, BrdDraftError, BrdDraftRequest, BrdSummary } from './brd';
+import type { BrdDraftChunk, BrdDraftDone, BrdDraftError, BrdDraftRequest, BrdSummary, BrdChanges, BrdCommitResult } from './brd';
 import type { RequirementsDone, RequirementsError, RequirementsGenerateRequest, RequirementsProgress, RequirementsSet } from './requirements';
 import type {
   CompetitorAnalysis,
@@ -833,6 +833,8 @@ export interface ElectronAPI {
   brdCreate: (projectId: string, title: string) => Promise<IPCResult<BrdSummary>>;
   brdDraft: (projectId: string, request: BrdDraftRequest) => Promise<IPCResult<{ runId: string }>>;
   brdDraftCancel: (runId: string) => Promise<IPCResult>;
+  brdChanges: (projectId: string) => Promise<IPCResult<BrdChanges>>;
+  brdCommit: (projectId: string, message: string, push: boolean) => Promise<IPCResult<BrdCommitResult>>;
   onBrdDraftChunk: (callback: (chunk: BrdDraftChunk) => void) => () => void;
   onBrdDraftDone: (callback: (done: BrdDraftDone) => void) => () => void;
   onBrdDraftError: (callback: (error: BrdDraftError) => void) => () => void;
