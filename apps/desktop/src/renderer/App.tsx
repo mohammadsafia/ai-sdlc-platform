@@ -36,6 +36,8 @@ import type { ProjectSettingsSection } from './components/settings/ProjectSettin
 import { TerminalGrid } from './components/TerminalGrid';
 import { Roadmap } from './components/Roadmap';
 import { RequirementsView } from './components/requirements/RequirementsView';
+import { DesignView } from './components/design/DesignView';
+import { DesignNavigationProvider } from './contexts/DesignNavigationContext';
 import { Context } from './components/Context';
 import { Ideation } from './components/Ideation';
 import { Insights } from './components/Insights';
@@ -59,6 +61,7 @@ import { ProactiveSwapListener } from './components/ProactiveSwapListener';
 import { GitHubSetupModal } from './components/GitHubSetupModal';
 import { useProjectStore, loadProjects, addProject, initializeProject, removeProject } from './stores/project-store';
 import { useBrdStore } from './stores/brd-store';
+import { useDesignStore } from './stores/design-store';
 import { useTaskStore, loadTasks } from './stores/task-store';
 import { useSettingsStore, loadSettings, loadProfiles, saveSettings } from './stores/settings-store';
 import { useClaudeProfileStore, loadClaudeProfiles } from './stores/claude-profile-store';
@@ -829,6 +832,13 @@ export function App() {
 
   return (
     <ViewStateProvider>
+    <DesignNavigationProvider
+      navigate={(brdSlug, requirementId) => {
+        useDesignStore.getState().requestOpen(brdSlug, requirementId);
+        handleCloseTaskDetail();
+        setActiveView('design');
+      }}
+    >
       <TooltipProvider>
         <ProactiveSwapListener />
       <div className="flex h-screen bg-background">
@@ -902,6 +912,11 @@ export function App() {
                 {activeView === 'requirements' && (activeProjectId || selectedProjectId) && (
                   <ErrorBoundary>
                     <RequirementsView projectId={activeProjectId || selectedProjectId!} />
+                  </ErrorBoundary>
+                )}
+                {activeView === 'design' && (activeProjectId || selectedProjectId) && (
+                  <ErrorBoundary>
+                    <DesignView projectId={activeProjectId || selectedProjectId!} />
                   </ErrorBoundary>
                 )}
                 {activeView === 'context' && (activeProjectId || selectedProjectId) && (
@@ -1200,6 +1215,7 @@ export function App() {
         <Toaster />
       </div>
       </TooltipProvider>
+    </DesignNavigationProvider>
     </ViewStateProvider>
   );
 }
