@@ -200,6 +200,11 @@ describe('releases', () => {
     expect(RequirementsSetSchema.safeParse(set({ releases: bad as never })).success).toBe(false);
   });
 
+  it('accepts a jira block on a release entry', () => {
+    const withJira = { M1: { releasedAt: 't', tasks: [{ proposedTaskId: 'T1', specId: 's' }], jira: { epicKey: 'ACME-1', issues: { T1: 'ACME-2' }, pushedAt: 't' } } };
+    expect(RequirementsSetSchema.safeParse(set({ releases: withJira })).success).toBe(true);
+  });
+
   it('mergeRefinement carries releases over from previous', () => {
     const previous = set({ releases });
     const body: GeneratedBody = {

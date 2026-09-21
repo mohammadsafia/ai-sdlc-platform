@@ -1,3 +1,4 @@
+import { JIRA_ENV_KEYS, jiraEnvUpdates, readJiraEnv } from '../jira/env';
 import { ipcMain } from 'electron';
 import type { BrowserWindow } from 'electron';
 import { IPC_CHANNELS, DEFAULT_APP_SETTINGS } from '../../shared/constants';
@@ -89,6 +90,8 @@ export function registerEnvHandlers(
     if (config.gitlabAutoSync !== undefined) {
       existingVars[GITLAB_ENV_KEYS.AUTO_SYNC] = config.gitlabAutoSync ? 'true' : 'false';
     }
+    // Jira Integration
+    Object.assign(existingVars, jiraEnvUpdates(config));
     // Git/Worktree Settings
     if (config.defaultBranch !== undefined) {
       existingVars['DEFAULT_BRANCH'] = config.defaultBranch;
@@ -214,6 +217,18 @@ ${envLine(existingVars, GITLAB_ENV_KEYS.PROJECT, 'group/project')}
 ${envLine(existingVars, GITLAB_ENV_KEYS.AUTO_SYNC, 'false')}
 
 # =============================================================================
+# JIRA INTEGRATION (OPTIONAL, Jira Cloud)
+# =============================================================================
+${existingVars[JIRA_ENV_KEYS.ENABLED] !== undefined ? `${JIRA_ENV_KEYS.ENABLED}=${existingVars[JIRA_ENV_KEYS.ENABLED]}` : `# ${JIRA_ENV_KEYS.ENABLED}=true`}
+${envLine(existingVars, JIRA_ENV_KEYS.BASE_URL, 'https://yourcompany.atlassian.net')}
+${envLine(existingVars, JIRA_ENV_KEYS.EMAIL)}
+${envLine(existingVars, JIRA_ENV_KEYS.API_TOKEN)}
+${envLine(existingVars, JIRA_ENV_KEYS.PROJECT_KEY, 'ACME')}
+${envLine(existingVars, JIRA_ENV_KEYS.ISSUE_TYPE, 'Task')}
+${envLine(existingVars, JIRA_ENV_KEYS.EPIC_ISSUE_TYPE, 'Epic')}
+${envLine(existingVars, JIRA_ENV_KEYS.STATUS_MAP, 'backlog:To Do;queue:To Do;in_progress:In Progress;ai_review:In Progress;human_review:In Progress;done:Done;pr_created:Done;error:')}
+
+# =============================================================================
 # GIT/WORKTREE SETTINGS (OPTIONAL)
 # =============================================================================
 # Default base branch for worktree creation
@@ -324,6 +339,7 @@ ${existingVars['GRAPHITI_DB_PATH'] ? `GRAPHITI_DB_PATH=${existingVars['GRAPHITI_
         linearEnabled: false,
         githubEnabled: false,
         gitlabEnabled: false,
+        jiraEnabled: false,
         memoryEnabled: false,
         enableFancyUi: true,
         openaiKeyIsGlobal: false
@@ -385,6 +401,9 @@ ${existingVars['GRAPHITI_DB_PATH'] ? `GRAPHITI_DB_PATH=${existingVars['GRAPHITI_
       if (vars[GITLAB_ENV_KEYS.AUTO_SYNC]?.toLowerCase() === 'true') {
         config.gitlabAutoSync = true;
       }
+
+      // Jira config
+      Object.assign(config, readJiraEnv(vars));
 
       // Git/Worktree config
       if (vars['DEFAULT_BRANCH']) {

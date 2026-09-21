@@ -38,10 +38,18 @@ export interface ReleasedTask {
   specId: string;           // Kanban task id and spec directory name
 }
 
+/** Jira issues created for a released milestone; may be partial after a failure midway. */
+export interface MilestoneJiraRelease {
+  epicKey: string;
+  issues: Record<string, string>;   // proposedTaskId → issue key
+  pushedAt: string;                 // ISO of the last successful batch
+}
+
 /** Release record for one milestone; may be partial after a failure midway. */
 export interface MilestoneRelease {
   releasedAt: string;       // ISO, first successful task creation
   tasks: ReleasedTask[];
+  jira?: MilestoneJiraRelease;
 }
 
 export interface RequirementsSet {

@@ -54,7 +54,8 @@ export const GeneratedBodySchema = z.object({
 });
 
 const releasedTaskSchema = z.object({ proposedTaskId: idSchema, specId: z.string().min(1) });
-const milestoneReleaseSchema = z.object({ releasedAt: z.string().min(1), tasks: z.array(releasedTaskSchema) });
+const milestoneJiraSchema = z.object({ epicKey: z.string().min(1), issues: z.record(z.string(), z.string().min(1)), pushedAt: z.string().min(1) });
+const milestoneReleaseSchema = z.object({ releasedAt: z.string().min(1), tasks: z.array(releasedTaskSchema), jira: milestoneJiraSchema.optional() });
 
 export const RequirementsSetSchema = z.object({
   version: z.literal(1),

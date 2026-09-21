@@ -180,12 +180,18 @@ export type TaskCategory =
 
 export interface TaskMetadata {
   // Origin tracking
-  sourceType?: 'ideation' | 'manual' | 'imported' | 'insights' | 'roadmap' | 'linear' | 'github' | 'gitlab' | 'requirements';
+  sourceType?: 'ideation' | 'manual' | 'imported' | 'insights' | 'roadmap' | 'linear' | 'github' | 'gitlab' | 'requirements' | 'jira';
   // Requirements set links (sourceType 'requirements')
   brdSlug?: string;          // docs/brd/<slug>.md
   milestoneId?: string;      // "M1"
   requirementIds?: string[]; // ["R1", "R4"]
   proposedTaskId?: string;   // "T3"
+  // Jira links (released tasks pushed to Jira, or imported issues)
+  jiraKey?: string;          // "ACME-123"
+  jiraUrl?: string;
+  jiraEpicKey?: string;
+  jiraSyncError?: string;    // last transition failure; cleared on success
+  jiraSyncedStatus?: string; // Jira status name last confirmed by a transition
   ideationType?: string;  // e.g., 'code_improvements', 'security_hardening'
   ideaId?: string;  // Reference to original idea if converted
   featureId?: string;  // Reference to roadmap feature if from roadmap

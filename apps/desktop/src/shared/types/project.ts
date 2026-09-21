@@ -1,3 +1,5 @@
+import type { JiraStatusMap } from '../jira/status-map';
+
 /**
  * Project-related types
  */
@@ -327,6 +329,16 @@ export interface ProjectEnvConfig {
   gitlabToken?: string;
   gitlabProject?: string; // Format: group/project or numeric ID
   gitlabAutoSync?: boolean; // Auto-sync issues on project load
+
+  // Jira Integration (Jira Cloud, email + API token)
+  jiraEnabled: boolean;
+  jiraBaseUrl?: string;       // https://acme.atlassian.net
+  jiraEmail?: string;
+  jiraApiToken?: string;
+  jiraProjectKey?: string;    // ACME
+  jiraIssueType?: string;     // default Task
+  jiraEpicIssueType?: string; // default Epic
+  jiraStatusMap?: JiraStatusMap;
 
   // Git/Worktree Settings
   defaultBranch?: string; // Base branch for worktree creation (e.g., 'main', 'develop')
