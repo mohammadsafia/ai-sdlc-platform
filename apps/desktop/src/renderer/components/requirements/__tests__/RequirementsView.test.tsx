@@ -33,6 +33,15 @@ beforeEach(() => {
 });
 
 describe('RequirementsView', () => {
+  it('opens a pending slug after the list loads', async () => {
+    api.brdList.mockResolvedValue({ success: true, data: [{ slug: 'todo-app', title: 'Todo app', status: 'draft', modifiedAt: 't' }] });
+    api.brdRead.mockResolvedValue({ success: true, data: { summary: { slug: 'todo-app', title: 'Todo app', status: 'draft', modifiedAt: 't' }, content: doc } });
+    useBrdStore.setState({ pendingOpenSlug: 'todo-app' });
+    render(<RequirementsView projectId="p1" />);
+    await waitFor(() => expect(api.brdRead).toHaveBeenCalledWith('p1', 'todo-app'));
+    expect(useBrdStore.getState().pendingOpenSlug).toBeNull();
+  });
+
   it('lists BRDs on mount and opens one on click', async () => {
     api.brdList.mockResolvedValue({ success: true, data: [{ slug: 'a', title: 'A', status: 'review', modifiedAt: 't' }] });
     api.brdRead.mockResolvedValue({ success: true, data: { summary: { slug: 'a', title: 'A', status: 'review', modifiedAt: 't' }, content: doc } });

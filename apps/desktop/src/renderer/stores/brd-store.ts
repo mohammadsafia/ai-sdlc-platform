@@ -24,9 +24,12 @@ interface BrdState {
   isLoading: boolean;
   isSaving: boolean;
   error: string | null;
+  /** BRD to open once the Requirements view has loaded its list (set from task detail). */
+  pendingOpenSlug: string | null;
 
   isDirty: () => boolean;
   reset: () => void;
+  requestOpen: (slug: string) => void;
   load: (projectId: string) => Promise<void>;
   select: (projectId: string, slug: string, opts?: { force?: boolean }) => Promise<boolean>;
   setContent: (content: string) => void;
@@ -51,6 +54,7 @@ const initial = {
   isLoading: false,
   isSaving: false,
   error: null as string | null,
+  pendingOpenSlug: null as string | null,
 };
 
 export const useBrdStore = create<BrdState>((set, get) => ({
@@ -58,7 +62,9 @@ export const useBrdStore = create<BrdState>((set, get) => ({
 
   isDirty: () => get().content !== get().savedContent,
 
-  reset: () => set({ ...initial, draft: { ...idleDraft } }),
+  reset: () => set((s) => ({ ...initial, draft: { ...idleDraft }, pendingOpenSlug: s.pendingOpenSlug })),
+
+  requestOpen: (slug) => set({ pendingOpenSlug: slug }),
 
   load: async (projectId) => {
     set({ isLoading: true, error: null });

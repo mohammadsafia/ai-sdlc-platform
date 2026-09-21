@@ -24,12 +24,17 @@ export function RequirementsView({ projectId }: { projectId: string }) {
     const stopRequirements = setupRequirementsListeners();
     reset();
     useRequirementsStore.getState().reset();
-    void load(projectId);
+    void load(projectId).then(() => {
+      const pending = useBrdStore.getState().pendingOpenSlug;
+      if (!pending) return;
+      useBrdStore.setState({ pendingOpenSlug: null });
+      void select(projectId, pending, { force: true });
+    });
     return () => {
       stop();
       stopRequirements();
     };
-  }, [projectId, load, reset]);
+  }, [projectId, load, reset, select]);
 
   /** Either the document or its requirements set has unsaved edits. */
   const anyDirty = () => useBrdStore.getState().isDirty() || useRequirementsStore.getState().isDirty();
