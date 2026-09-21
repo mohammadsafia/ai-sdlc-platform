@@ -868,7 +868,8 @@ vi.mock('../task/create-task', () => ({ createTaskInProject: createTask }));
 
   it('release refuses while a generation run is active for the slug', async () => {
     files.readRequirements.mockResolvedValue(null);
-    await handlers.get('requirements:generate')!({}, 'p1', 'a', { slug: 'a', mode: 'generate' });
+    const g = await handlers.get('requirements:generate')!({}, 'p1', { slug: 'a', mode: 'generate' });
+    expect(g).toMatchObject({ success: true });
     const r = await handlers.get('requirements:release')!({}, 'p1', 'a', 'M1');
     expect(r).toEqual({ success: false, error: 'A run is already in progress for this BRD' });
     await tick();

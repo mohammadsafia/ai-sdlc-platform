@@ -243,6 +243,7 @@ const browserMockAPI: ElectronAPI = {
   requirementsApprove: async () => ({ success: false, error: 'Not available in browser mock' }),
   requirementsGenerate: async () => ({ success: false, error: 'Not available in browser mock' }),
   requirementsCancel: async () => ({ success: false, error: 'Not available in browser mock' }),
+  requirementsRelease: async () => ({ success: false, error: 'Not available in browser mock' }),
   onRequirementsProgress: () => () => undefined,
   onRequirementsDone: () => () => undefined,
   onRequirementsError: () => () => undefined,

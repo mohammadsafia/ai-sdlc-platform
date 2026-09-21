@@ -3,10 +3,11 @@ import { randomUUID } from 'node:crypto';
 import { ipcMain } from 'electron';
 import type { BrowserWindow } from 'electron';
 
+import { buildReleaseTaskInput, includedTasksOf, releaseGate, type ReleaseGateReason } from '../../shared/brd/release';
 import { assignIds, mergeRefinement, validateRequirementsSet } from '../../shared/brd/requirements';
 import { checkBrdStructure } from '../../shared/brd/structure';
 import { IPC_CHANNELS } from '../../shared/constants';
-import type { IPCResult } from '../../shared/types';
+import type { IPCResult, Task } from '../../shared/types';
 import type { RequirementsGenerateRequest, RequirementsSet } from '../../shared/types/requirements';
 import type { ThinkingLevel } from '../ai/config/types';
 import { runRequirementsGenerator } from '../ai/runners/requirements-generator';
@@ -14,10 +15,20 @@ import { readBrd } from '../brd/brd-files';
 import { brdHash, readRequirements, writeRequirements } from '../brd/requirements-files';
 import { projectStore } from '../project-store';
 import { getActiveProviderFeatureSettings } from './feature-settings-helper';
+import { createTaskInProject } from './task/create-task';
 import { safeSendToRenderer } from './utils';
 
 interface ActiveRun { runId: string; slug: string; controller: AbortController }
 const activeRuns = new Map<string, ActiveRun>(); // keyed by `${projectId}:${slug}`
+
+const RELEASE_GATE_MESSAGES: Record<ReleaseGateReason, string> = {
+  noSet: 'Generate and approve a requirements set before releasing a milestone',
+  notApproved: 'Approve the requirements set before releasing a milestone',
+  dirty: 'Save the requirements set before releasing a milestone',
+  stale: 'The BRD changed since this set was generated; regenerate and approve it first',
+  notNext: 'Release earlier milestones first',
+  complete: 'This milestone is already released',
+};
 
 function fail(error: unknown): IPCResult<never> {
   return { success: false, error: error instanceof Error ? error.message : String(error) };
@@ -146,4 +157,50 @@ export function registerRequirementsHandlers(getMainWindow: () => BrowserWindow 
     run.controller.abort();
     return { success: true };
   });
+
+  ipcMain.handle(
+    IPC_CHANNELS.REQUIREMENTS_RELEASE,
+    async (_e, projectId: string, slug: string, milestoneId: string): Promise<IPCResult<{ set: RequirementsSet; tasks: Task[] }>> => {
+      const project = projectStore.getProject(projectId);
+      if (!project) return { success: false, error: `Project not found: ${projectId}` };
+      const key = `${projectId}:${slug}`;
+      if (activeRuns.has(key)) return { success: false, error: 'A run is already in progress for this BRD' };
+      activeRuns.set(key, { runId: randomUUID(), slug, controller: new AbortController() });
+      try {
+        const [stored, brd] = await Promise.all([readRequirements(project.path, slug), readBrd(project.path, slug)]);
+        const reason = releaseGate(stored, stored, brdHash(brd.content), milestoneId);
+        if (reason || !stored) return { success: false, error: RELEASE_GATE_MESSAGES[reason ?? 'noSet'] };
+
+        let current: RequirementsSet = stored;
+        const created: Task[] = [];
+        const alreadyDone = new Set((current.releases?.[milestoneId]?.tasks ?? []).map((t) => t.proposedTaskId));
+        for (const proposed of includedTasksOf(current, milestoneId)) {
+          if (alreadyDone.has(proposed.id)) continue;
+          let task: Task;
+          try {
+            task = createTaskInProject(project, buildReleaseTaskInput(current, proposed, brd.summary.title));
+          } catch (err) {
+            return { success: false, error: `Could not create a task for ${proposed.id} (${proposed.title}): ${err instanceof Error ? err.message : String(err)}` };
+          }
+          created.push(task);
+          const entry = current.releases?.[milestoneId] ?? { releasedAt: new Date().toISOString(), tasks: [] };
+          current = {
+            ...current,
+            releases: { ...(current.releases ?? {}), [milestoneId]: { ...entry, tasks: [...entry.tasks, { proposedTaskId: proposed.id, specId: task.specId }] } },
+          };
+          try {
+            current = await writeRequirements(project.path, slug, current);
+          } catch (err) {
+            const ids = created.map((t) => t.specId).join(', ');
+            return { success: false, error: `Tasks ${ids} were created but the release record could not be saved: ${err instanceof Error ? err.message : String(err)}` };
+          }
+        }
+        return { success: true, data: { set: current, tasks: created } };
+      } catch (err) {
+        return fail(err);
+      } finally {
+        activeRuns.delete(key);
+      }
+    },
+  );
 }

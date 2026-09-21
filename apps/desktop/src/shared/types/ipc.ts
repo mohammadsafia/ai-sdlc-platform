@@ -836,6 +836,7 @@ export interface ElectronAPI {
   requirementsApprove: (projectId: string, slug: string, set: RequirementsSet) => Promise<IPCResult<RequirementsSet>>;
   requirementsGenerate: (projectId: string, request: RequirementsGenerateRequest) => Promise<IPCResult<{ runId: string }>>;
   requirementsCancel: (runId: string) => Promise<IPCResult>;
+  requirementsRelease: (projectId: string, slug: string, milestoneId: string) => Promise<IPCResult<{ set: RequirementsSet; tasks: Task[] }>>;
   onRequirementsProgress: (callback: (p: RequirementsProgress) => void) => () => void;
   onRequirementsDone: (callback: (d: RequirementsDone) => void) => () => void;
   onRequirementsError: (callback: (e: RequirementsError) => void) => () => void;

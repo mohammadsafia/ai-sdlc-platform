@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { RequirementsSet } from '../../../shared/types/requirements';
 
-const { handlers, sent, getProject, files, brd, run, featureSettings } = vi.hoisted(() => ({
+const { handlers, sent, getProject, files, brd, run, featureSettings, createTask } = vi.hoisted(() => ({
   handlers: new Map<string, (...args: unknown[]) => unknown>(),
   sent: [] as unknown[][],
   getProject: vi.fn(),
@@ -10,6 +10,7 @@ const { handlers, sent, getProject, files, brd, run, featureSettings } = vi.hois
   brd: { readBrd: vi.fn() },
   run: vi.fn(),
   featureSettings: vi.fn(() => ({ model: 'sonnet', thinkingLevel: 'medium' })),
+  createTask: vi.fn(),
 }));
 vi.mock('electron', () => ({ ipcMain: { handle: vi.fn((c: string, fn: (...a: unknown[]) => unknown) => handlers.set(c, fn)) } }));
 vi.mock('../utils', () => ({ safeSendToRenderer: vi.fn((_g: unknown, ...args: unknown[]) => { sent.push(args); return true; }) }));
@@ -18,6 +19,7 @@ vi.mock('../../brd/requirements-files', () => files);
 vi.mock('../../brd/brd-files', () => brd);
 vi.mock('../../ai/runners/requirements-generator', () => ({ runRequirementsGenerator: run }));
 vi.mock('../feature-settings-helper', () => ({ getActiveProviderFeatureSettings: featureSettings }));
+vi.mock('../task/create-task', () => ({ createTaskInProject: createTask }));
 
 import { registerRequirementsHandlers } from '../requirements-handlers';
 
@@ -113,5 +115,66 @@ describe('requirements handlers', () => {
     expect(await handlers.get('requirements:cancel')!({}, first.data.runId)).toEqual({ success: true });
     await tick();
     expect(sent.at(-1)).toEqual(['requirements:error', { runId: first.data.runId, error: 'cancelled' }]);
+  });
+  const approved: RequirementsSet = { ...set, status: 'approved', approvedAt: 't' };
+  const madeTask = (specId: string) => ({ id: specId, specId, projectId: 'p1', title: 't', description: 'd', status: 'backlog', subtasks: [], logs: [], metadata: {}, createdAt: new Date(), updatedAt: new Date() });
+
+  it('release refuses when the gate fails and creates nothing', async () => {
+    files.readRequirements.mockResolvedValue(set); // draft
+    const r = await handlers.get('requirements:release')!({}, 'p1', 'a', 'M1');
+    expect(r).toEqual({ success: false, error: 'Approve the requirements set before releasing a milestone' });
+    expect(createTask).not.toHaveBeenCalled();
+  });
+
+  it('release creates one task per included proposed task, records each, and returns them', async () => {
+    files.readRequirements.mockResolvedValue(approved);
+    files.writeRequirements.mockImplementation(async (_p: string, _s: string, s: RequirementsSet) => s);
+    createTask.mockReturnValueOnce(madeTask('001-t'));
+    const r = (await handlers.get('requirements:release')!({}, 'p1', 'a', 'M1')) as { success: boolean; data: { set: RequirementsSet; tasks: unknown[] } };
+    expect(r.success).toBe(true);
+    expect(createTask).toHaveBeenCalledTimes(1);
+    const [, input] = createTask.mock.calls[0];
+    expect(input.title).toBe('t');
+    expect(input.metadata).toMatchObject({ sourceType: 'requirements', brdSlug: 'a', milestoneId: 'M1', requirementIds: ['R1'], proposedTaskId: 'T1' });
+    expect(r.data.tasks).toHaveLength(1);
+    expect(r.data.set.releases?.M1.tasks).toEqual([{ proposedTaskId: 'T1', specId: '001-t' }]);
+    expect(r.data.set.releases?.M1.releasedAt).toBeTruthy();
+    expect(files.writeRequirements).toHaveBeenCalledTimes(1);
+  });
+
+  it('release stops at the first creation failure, keeps the partial record, and skips done tasks on retry', async () => {
+    const two: RequirementsSet = {
+      ...approved,
+      tasks: [
+        approved.tasks[0],
+        { id: 'T2', title: 'u', description: 'd', milestoneId: 'M1', requirementIds: ['R1'], category: 'feature', order: 2, included: true },
+      ],
+    };
+    files.readRequirements.mockResolvedValue(two);
+    files.writeRequirements.mockImplementation(async (_p: string, _s: string, s: RequirementsSet) => s);
+    createTask.mockReturnValueOnce(madeTask('001-t')).mockImplementationOnce(() => { throw new Error('disk full'); });
+    const r = (await handlers.get('requirements:release')!({}, 'p1', 'a', 'M1')) as { success: boolean; error: string };
+    expect(r.success).toBe(false);
+    expect(r.error).toBe('Could not create a task for T2 (u): disk full');
+    const written = files.writeRequirements.mock.calls.at(-1)?.[2] as RequirementsSet;
+    expect(written.releases?.M1.tasks).toEqual([{ proposedTaskId: 'T1', specId: '001-t' }]);
+
+    // Retry: T1 already has a spec id and is skipped
+    files.readRequirements.mockResolvedValue(written);
+    createTask.mockReset();
+    createTask.mockReturnValueOnce(madeTask('002-u'));
+    const again = (await handlers.get('requirements:release')!({}, 'p1', 'a', 'M1')) as { success: boolean; data: { set: RequirementsSet } };
+    expect(again.success).toBe(true);
+    expect(createTask).toHaveBeenCalledTimes(1);
+    expect(again.data.set.releases?.M1.tasks.map((t) => t.proposedTaskId)).toEqual(['T1', 'T2']);
+  });
+
+  it('release refuses while a generation run is active for the slug', async () => {
+    files.readRequirements.mockResolvedValue(null);
+    const g = await handlers.get('requirements:generate')!({}, 'p1', { slug: 'a', mode: 'generate' });
+    expect(g).toMatchObject({ success: true });
+    const r = await handlers.get('requirements:release')!({}, 'p1', 'a', 'M1');
+    expect(r).toEqual({ success: false, error: 'A run is already in progress for this BRD' });
+    await tick();
   });
 });

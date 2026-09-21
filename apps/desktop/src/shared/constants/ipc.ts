@@ -35,6 +35,7 @@ export const IPC_CHANNELS = {
   REQUIREMENTS_PROGRESS: 'requirements:progress',
   REQUIREMENTS_DONE: 'requirements:done',
   REQUIREMENTS_ERROR: 'requirements:error',
+  REQUIREMENTS_RELEASE: 'requirements:release',
   PROJECT_CHECK_VERSION: 'project:checkVersion',
 
   // Tab state operations (persisted in main process)
