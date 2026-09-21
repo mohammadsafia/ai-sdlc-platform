@@ -28,7 +28,7 @@ describe('brdChanges', () => {
   it('returns the branch and files scoped to docs/brd', () => {
     execFileSync.mockReturnValueOnce('true\n').mockReturnValueOnce('develop\n').mockReturnValueOnce(' M docs/brd/a.md\n');
     expect(brdChanges('/repo', 'git')).toEqual({ branch: 'develop', files: [{ path: 'docs/brd/a.md', status: 'modified' }] });
-    expect(calls()[2]).toBe('status --porcelain -- docs/brd');
+    expect(calls()[2]).toBe('status --porcelain -- docs/brd docs/design');
   });
 
   it('throws when not a git repository', () => {
@@ -43,7 +43,7 @@ describe('commitBrd', () => {
     pushBranch.mockReturnValue(undefined);
     const auth = { remoteUrl: 'https://bitbucket.org/a/b.git', header: 'Authorization: Basic x' };
     expect(await commitBrd('/repo', 'docs(brd): update a', true, auth, 'git')).toEqual({ commit: 'abc1234', pushed: true });
-    expect(calls().slice(2, 5)).toEqual(['add -A -- docs/brd', 'commit -m docs(brd): update a -- docs/brd', 'rev-parse --short HEAD']);
+    expect(calls().slice(2, 5)).toEqual(['add -A -- docs/brd docs/design', 'commit -m docs(brd): update a -- docs/brd docs/design', 'rev-parse --short HEAD']);
     expect(pushBranch).toHaveBeenCalledWith('/repo', 'git', 'develop', auth);
   });
 

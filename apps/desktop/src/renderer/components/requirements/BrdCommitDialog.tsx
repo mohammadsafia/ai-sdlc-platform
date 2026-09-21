@@ -13,15 +13,24 @@ import { Textarea } from '../ui/textarea';
 
 const PUSH_KEY = 'brd.commit.push';
 
+const DESIGN_PREFIX = 'docs/design/';
+
 function slugOf(path: string): string {
-  return path.split('/').pop()?.replace(/\.requirements\.json$/, '').replace(/\.md$/, '') ?? path;
+  const file = path.split('/').pop()?.replace(/\.requirements\.json$/, '').replace(/\.md$/, '') ?? path;
+  if (path.startsWith(DESIGN_PREFIX)) {
+    const brd = path.split('/')[2];
+    return brd ? `${brd}/${file}` : file;
+  }
+  return file;
 }
 
-/** `docs(brd): update a, b`, or `add` when every change is new. */
+/** `docs(brd): update a, b` (or docs(design), or docs when mixed); `add` when every change is new. */
 export function defaultCommitMessage(files: BrdChangedFile[]): string {
   const slugs = Array.from(new Set(files.map((f) => slugOf(f.path)))).sort();
   const allNew = files.length > 0 && files.every((f) => f.status === 'untracked' || f.status === 'added');
-  return `docs(brd): ${allNew ? 'add' : 'update'} ${slugs.join(', ')}`;
+  const kinds = new Set(files.map((f) => (f.path.startsWith(DESIGN_PREFIX) ? 'design' : 'brd')));
+  const scope = kinds.size === 1 ? `docs(${[...kinds][0]})` : 'docs';
+  return `${scope}: ${allNew ? 'add' : 'update'} ${slugs.join(', ')}`;
 }
 
 function readPushPreference(): boolean {

@@ -6,6 +6,7 @@ import type { BrowserWindow } from 'electron';
 import { buildReleaseTaskInput, includedTasksOf, releaseGate, type ReleaseGateReason } from '../../shared/brd/release';
 import { assignIds, mergeRefinement, validateRequirementsSet } from '../../shared/brd/requirements';
 import { checkBrdStructure } from '../../shared/brd/structure';
+import { needsDesignWithoutApprovedBrief } from '../../shared/design/release';
 import { IPC_CHANNELS } from '../../shared/constants';
 import type { IPCResult, Task } from '../../shared/types';
 import type { RequirementsGenerateRequest, RequirementsSet } from '../../shared/types/requirements';
@@ -13,6 +14,7 @@ import type { ThinkingLevel } from '../ai/config/types';
 import { runRequirementsGenerator } from '../ai/runners/requirements-generator';
 import { readBrd } from '../brd/brd-files';
 import { brdHash, readRequirements, writeRequirements } from '../brd/requirements-files';
+import { listDesignBriefs } from '../design/design-files';
 import { projectStore } from '../project-store';
 import { getActiveProviderFeatureSettings } from './feature-settings-helper';
 import { getJiraConfig } from '../jira/config';
@@ -215,6 +217,14 @@ export function registerRequirementsHandlers(getMainWindow: () => BrowserWindow 
             warnings.push(...pushed.warnings);
           } catch (err) {
             warnings.push(`Jira push failed: ${err instanceof Error ? err.message : String(err)}`);
+          }
+        }
+        if (created.length > 0) {
+          try {
+            const missing = needsDesignWithoutApprovedBrief(current, milestoneId, await listDesignBriefs(project.path));
+            if (missing.length > 0) warnings.push(`No approved design brief for ${missing.join(', ')}`);
+          } catch {
+            // Design briefs are advisory; a read failure must not fail the release
           }
         }
         return { success: true, data: { set: current, tasks: created, warnings } };

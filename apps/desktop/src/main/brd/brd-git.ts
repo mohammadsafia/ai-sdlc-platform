@@ -6,7 +6,7 @@ import { type PushAuth, pushBranch } from '../ai/runners/pr-common';
 import { getToolPath } from '../cli-tool-manager';
 import { getIsolatedGitEnv } from '../utils/git-isolation';
 
-const BRD_PATHSPEC = 'docs/brd';
+const BRD_PATHSPECS = ['docs/brd', 'docs/design'];
 
 function git(gitPath: string, cwd: string, args: string[]): string {
   return execFileSync(gitPath, args, { cwd, env: getIsolatedGitEnv(), encoding: 'utf-8', stdio: 'pipe' });
@@ -45,7 +45,7 @@ export function parsePorcelain(output: string): BrdChangedFile[] {
 export function brdChanges(projectDir: string, gitPath: string = getToolPath('git')): BrdChanges {
   assertRepo(gitPath, projectDir);
   const branch = git(gitPath, projectDir, ['rev-parse', '--abbrev-ref', 'HEAD']).trim();
-  const files = parsePorcelain(git(gitPath, projectDir, ['status', '--porcelain', '--', BRD_PATHSPEC]));
+  const files = parsePorcelain(git(gitPath, projectDir, ['status', '--porcelain', '--', ...BRD_PATHSPECS]));
   return { branch, files };
 }
 
@@ -61,8 +61,8 @@ export async function commitBrd(
   if (!trimmed) throw new Error('Commit message is required');
   assertRepo(gitPath, projectDir);
   const branch = git(gitPath, projectDir, ['rev-parse', '--abbrev-ref', 'HEAD']).trim();
-  git(gitPath, projectDir, ['add', '-A', '--', BRD_PATHSPEC]);
-  git(gitPath, projectDir, ['commit', '-m', trimmed, '--', BRD_PATHSPEC]);
+  git(gitPath, projectDir, ['add', '-A', '--', ...BRD_PATHSPECS]);
+  git(gitPath, projectDir, ['commit', '-m', trimmed, '--', ...BRD_PATHSPECS]);
   const commit = git(gitPath, projectDir, ['rev-parse', '--short', 'HEAD']).trim();
   if (!push) return { commit, pushed: false };
   const pushError = pushBranch(projectDir, gitPath, branch, auth);

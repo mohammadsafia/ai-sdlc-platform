@@ -34,6 +34,8 @@ describe('defaultCommitMessage', () => {
   it('lists slugs once, sorted, and says add when everything is new', () => {
     expect(defaultCommitMessage(files)).toBe('docs(brd): update onboarding, todo-app');
     expect(defaultCommitMessage(files.slice(1))).toBe('docs(brd): add onboarding, todo-app');
+    expect(defaultCommitMessage([{ path: 'docs/design/todo-app/R3.md', status: 'modified' }])).toBe('docs(design): update todo-app/R3');
+    expect(defaultCommitMessage([{ path: 'docs/design/todo-app/R3.md', status: 'untracked' }, { path: 'docs/brd/todo-app.md', status: 'modified' }])).toBe('docs: update todo-app, todo-app/R3');
   });
 });
 

@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { RequirementsSet } from '../../../shared/types/requirements';
 
-const { handlers, sent, getProject, files, brd, run, featureSettings, createTask, jiraPush, jiraCfg } = vi.hoisted(() => ({
+const { handlers, sent, getProject, files, brd, run, featureSettings, createTask, jiraPush, jiraCfg, designFiles } = vi.hoisted(() => ({
   handlers: new Map<string, (...args: unknown[]) => unknown>(),
   sent: [] as unknown[][],
   getProject: vi.fn(),
@@ -13,6 +13,7 @@ const { handlers, sent, getProject, files, brd, run, featureSettings, createTask
   createTask: vi.fn(),
   jiraPush: { pushMilestoneToJira: vi.fn() },
   jiraCfg: { getJiraConfig: vi.fn(() => null as unknown) },
+  designFiles: { listDesignBriefs: vi.fn(async () => [] as unknown[]) },
 }));
 vi.mock('electron', () => ({ ipcMain: { handle: vi.fn((c: string, fn: (...a: unknown[]) => unknown) => handlers.set(c, fn)) } }));
 vi.mock('../utils', () => ({ safeSendToRenderer: vi.fn((_g: unknown, ...args: unknown[]) => { sent.push(args); return true; }) }));
@@ -24,6 +25,7 @@ vi.mock('../feature-settings-helper', () => ({ getActiveProviderFeatureSettings:
 vi.mock('../task/create-task', () => ({ createTaskInProject: createTask }));
 vi.mock('../../jira/push-milestone', () => jiraPush);
 vi.mock('../../jira/config', () => jiraCfg);
+vi.mock('../../design/design-files', () => designFiles);
 
 import { registerRequirementsHandlers } from '../requirements-handlers';
 
@@ -205,5 +207,16 @@ describe('requirements handlers', () => {
     const r = (await handlers.get('requirements:release')!({}, 'p1', 'a', 'M1')) as { data: { warnings: string[] } };
     expect(r.data.warnings).toEqual([]);
     expect(jiraPush.pushMilestoneToJira).not.toHaveBeenCalled();
+  });
+
+  it('release warns about needsDesign requirements without an approved brief', async () => {
+    const needsDesign = { ...approved, requirements: [{ ...approved.requirements[0], needsDesign: true }] };
+    files.readRequirements.mockResolvedValue(needsDesign);
+    files.writeRequirements.mockImplementation(async (_p: string, _s: string, s: RequirementsSet) => s);
+    createTask.mockReturnValueOnce(madeTask('001-t'));
+    designFiles.listDesignBriefs.mockResolvedValueOnce([{ brdSlug: 'a', requirementId: 'R1', status: 'draft', title: '', modifiedAt: '' }]);
+    const r = (await handlers.get('requirements:release')!({}, 'p1', 'a', 'M1')) as { success: boolean; data: { warnings: string[] } };
+    expect(r.success).toBe(true);
+    expect(r.data.warnings).toEqual(['No approved design brief for R1']);
   });
 });
