@@ -504,7 +504,7 @@ import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync } from 'node:f
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
-const invalidate = vi.fn();
+const { invalidate } = vi.hoisted(() => ({ invalidate: vi.fn() }));
 vi.mock('../../../project-store', () => ({ projectStore: { invalidateTasksCache: invalidate } }));
 
 import { createTaskInProject } from '../create-task';

@@ -3,7 +3,6 @@ import type { BrowserWindow } from "electron";
 import {
   IPC_CHANNELS,
   AUTO_BUILD_PATHS,
-  getSpecsDir,
 } from "../../shared/constants";
 import type {
   IPCResult,
@@ -12,18 +11,18 @@ import type {
   RoadmapGenerationStatus,
   PersistedRoadmapProgress,
   Task,
-  TaskMetadata,
   CompetitorAnalysis,
 } from "../../shared/types";
 import type { RoadmapConfig } from "../agent/types";
 import path from "path";
-import { existsSync, mkdirSync, readdirSync, unlinkSync } from "fs";
+import { existsSync, mkdirSync, unlinkSync } from "fs";
 import { projectStore } from "../project-store";
 import { AgentManager } from "../agent";
 import { debugLog, debugError } from "../../shared/utils/debug-logger";
 import { safeSendToRenderer } from "./utils";
 import { writeFileWithRetry, readFileWithRetry } from "../utils/atomic-file";
 import { withFileLock } from "../utils/file-lock";
+import { createTaskInProject } from "./task/create-task";
 import { getActiveProviderFeatureSettings } from "./feature-settings-helper";
 
 /**
@@ -512,84 +511,13 @@ ${(feature.user_stories || []).map((s: string) => `- ${s}`).join("\n") || "N/A"}
 ${(feature.acceptance_criteria || []).map((c: string) => `- [ ] ${c}`).join("\n") || "N/A"}
 `;
 
-        // Generate proper spec directory (like task creation)
-        const specsBaseDir = getSpecsDir(project.autoBuildPath);
-        const specsDir = path.join(project.path, specsBaseDir);
-
-        // Ensure specs directory exists
-        if (!existsSync(specsDir)) {
-          mkdirSync(specsDir, { recursive: true });
-        }
-
-        // Find next available spec number
-        let specNumber = 1;
-        const existingDirs = existsSync(specsDir)
-          ? readdirSync(specsDir, { withFileTypes: true })
-              .filter((d) => d.isDirectory())
-              .map((d) => d.name)
-          : [];
-        const existingNumbers = existingDirs
-          .map((name) => {
-            const match = name.match(/^(\d+)/);
-            return match ? parseInt(match[1], 10) : 0;
-          })
-          .filter((n) => n > 0);
-        if (existingNumbers.length > 0) {
-          specNumber = Math.max(...existingNumbers) + 1;
-        }
-
-        // Create spec ID with zero-padded number and slugified title
-        const slugifiedTitle = feature.title
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/^-|-$/g, "")
-          .substring(0, 50);
-        const specId = `${String(specNumber).padStart(3, "0")}-${slugifiedTitle}`;
-
-        // Create spec directory
-        const specDir = path.join(specsDir, specId);
-        mkdirSync(specDir, { recursive: true });
-
-        // Create initial implementation_plan.json
-        const now = new Date().toISOString();
-        const implementationPlan = {
-          feature: feature.title,
+        const task = createTaskInProject(project, {
+          title: feature.title,
           description: taskDescription,
-          created_at: now,
-          updated_at: now,
-          status: "pending",
-          phases: [],
-        };
-        await writeFileWithRetry(
-          path.join(specDir, AUTO_BUILD_PATHS.IMPLEMENTATION_PLAN),
-          JSON.stringify(implementationPlan, null, 2),
-          { encoding: 'utf-8' }
-        );
-
-        // Create requirements.json
-        const requirements = {
-          task_description: taskDescription,
-          workflow_type: "feature",
-        };
-        await writeFileWithRetry(
-          path.join(specDir, AUTO_BUILD_PATHS.REQUIREMENTS),
-          JSON.stringify(requirements, null, 2),
-          { encoding: 'utf-8' }
-        );
-
-        // Create spec.md (required by backend spec creation process)
-        await writeFileWithRetry(path.join(specDir, AUTO_BUILD_PATHS.SPEC_FILE), taskDescription, { encoding: 'utf-8' });
-
-        // Build metadata
-        const metadata: TaskMetadata = {
-          sourceType: "roadmap",
-          featureId: feature.id,
-          category: "feature",
-        };
-        await writeFileWithRetry(path.join(specDir, "task_metadata.json"), JSON.stringify(metadata, null, 2), { encoding: 'utf-8' });
-
-        // NOTE: We do NOT auto-start spec creation here - user should explicitly start the task
-        // from the kanban board when they're ready
+          specMarkdown: taskDescription,
+          metadata: { sourceType: "roadmap", featureId: feature.id, category: "feature" },
+        });
+        const specId = task.specId;
 
         // Update feature with linked spec
         feature.status = "planned";
@@ -597,21 +525,6 @@ ${(feature.acceptance_criteria || []).map((c: string) => `- [ ] ${c}`).join("\n"
         roadmap.metadata = roadmap.metadata || {};
         roadmap.metadata.updated_at = new Date().toISOString();
         await writeFileWithRetry(roadmapPath, JSON.stringify(roadmap, null, 2), { encoding: 'utf-8' });
-
-        // Create task object
-        const task: Task = {
-          id: specId,
-          specId: specId,
-          projectId,
-          title: feature.title,
-          description: taskDescription,
-          status: "backlog",
-          subtasks: [],
-          logs: [],
-          metadata,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
 
         return { success: true, data: task };
         });
