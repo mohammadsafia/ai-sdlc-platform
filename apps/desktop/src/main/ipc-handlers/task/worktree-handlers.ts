@@ -10,7 +10,7 @@ import { projectStore } from '../../project-store';
 
 import { MergeOrchestrator } from '../../ai/merge/orchestrator';
 import { createMergeResolverFn } from '../../ai/runners/merge-resolver';
-import { createPR } from '../../ai/runners/github/pr-creator';
+import { createTaskPR } from './create-task-pr';
 import type { ModelShorthand } from '../../ai/config/types';
 import { findTaskAndProject } from './shared';
 import { updateRoadmapFeatureOutcome } from '../../utils/roadmap-utils';
@@ -3041,23 +3041,17 @@ export function registerWorktreeHandlers(
           debug('Using stored base branch:', taskBaseBranch);
         }
 
-        // Get tool paths
-        const ghPath = getToolPath('gh');
-        const gitPath = getToolPath('git');
-
         debug('Creating PR via TypeScript runner:', { branchName, baseBranch, prTitle });
 
-        // Run the TypeScript PR creator
-        const result = await createPR({
-          projectDir: project.path,
+        // Bitbucket when origin is on bitbucket.org, otherwise GitHub via gh
+        const result = await createTaskPR({
+          project,
           worktreePath,
           specId: task.specId,
           branchName,
           baseBranch,
           title: prTitle,
           draft: options?.draft,
-          ghPath,
-          gitPath,
         });
 
         debug('PR creation result:', result);
