@@ -2,7 +2,7 @@
 import { create } from 'zustand';
 
 import { checkBrdStructure } from '../../shared/brd/structure';
-import type { BrdDraftMode, BrdStructureResult, BrdSummary } from '../../shared/types/brd';
+import type { BrdChanges, BrdCommitResult, BrdDraftMode, BrdStructureResult, BrdSummary } from '../../shared/types/brd';
 
 export type DraftStatus = 'idle' | 'streaming' | 'proposal';
 
@@ -26,6 +26,11 @@ interface BrdState {
   error: string | null;
   /** BRD to open once the Requirements view has loaded its list (set from task detail). */
   pendingOpenSlug: string | null;
+  /** Git state of docs/brd; null when the project is not a git repository. */
+  changes: BrdChanges | null;
+  isCommitting: boolean;
+  lastCommit: BrdCommitResult | null;
+  commitError: string | null;
 
   isDirty: () => boolean;
   reset: () => void;
@@ -39,6 +44,8 @@ interface BrdState {
   cancelDraft: () => Promise<void>;
   acceptDraft: () => void;
   discardDraft: () => void;
+  refreshChanges: (projectId: string) => Promise<void>;
+  commit: (projectId: string, message: string, push: boolean) => Promise<boolean>;
 }
 
 const idleDraft: DraftState = { status: 'idle', text: '' };
@@ -55,6 +62,10 @@ const initial = {
   isSaving: false,
   error: null as string | null,
   pendingOpenSlug: null as string | null,
+  changes: null as BrdChanges | null,
+  isCommitting: false,
+  lastCommit: null as BrdCommitResult | null,
+  commitError: null as string | null,
 };
 
 export const useBrdStore = create<BrdState>((set, get) => ({
@@ -156,6 +167,23 @@ export const useBrdStore = create<BrdState>((set, get) => ({
   },
 
   discardDraft: () => set({ draft: { ...idleDraft } }),
+
+  refreshChanges: async (projectId) => {
+    const result = await window.electronAPI.brdChanges(projectId);
+    set({ changes: result.success && result.data ? result.data : null });
+  },
+
+  commit: async (projectId, message, push) => {
+    set({ isCommitting: true, commitError: null, lastCommit: null });
+    const result = await window.electronAPI.brdCommit(projectId, message, push);
+    if (!result.success || !result.data) {
+      set({ commitError: result.error ?? 'Unknown error', isCommitting: false });
+      return false;
+    }
+    set({ lastCommit: result.data, isCommitting: false });
+    await get().refreshChanges(projectId);
+    return true;
+  },
 }));
 
 /** Subscribe to draft stream events. Returns an unsubscribe function. */

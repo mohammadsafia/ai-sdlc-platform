@@ -23,6 +23,7 @@ const api = {
   onRequirementsProgress: vi.fn(() => () => undefined),
   onRequirementsDone: vi.fn(() => () => undefined),
   onRequirementsError: vi.fn(() => () => undefined),
+  brdChanges: vi.fn().mockResolvedValue({ success: true, data: { branch: 'develop', files: [{ path: 'docs/brd/a.md', status: 'modified' }] } }),
 };
 const doc = '---\ntitle: A\nstatus: draft\ncreated: 2026-09-20\n---\n# A\n';
 
@@ -64,5 +65,14 @@ describe('RequirementsView', () => {
     fireEvent.click(screen.getByRole('button', { name: 'newDialog.create' }));
     await waitFor(() => expect(api.brdCreate).toHaveBeenCalledWith('p1', 'Onboarding'));
     expect((await screen.findAllByText('Onboarding')).length).toBeGreaterThan(0);
+  });
+
+  it('shows the Commit button with the change count and refreshes after a save', async () => {
+    api.brdList.mockResolvedValue({ success: true, data: [] });
+    render(<RequirementsView projectId="p1" />);
+    expect(await screen.findByRole('button', { name: /commit.button/ })).toHaveTextContent('1');
+    expect(api.brdChanges).toHaveBeenCalledTimes(1);
+    useBrdStore.setState({ savedContent: 'changed' });
+    await waitFor(() => expect(api.brdChanges).toHaveBeenCalledTimes(2));
   });
 });

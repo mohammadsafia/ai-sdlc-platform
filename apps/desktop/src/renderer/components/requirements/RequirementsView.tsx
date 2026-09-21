@@ -1,5 +1,5 @@
 // apps/desktop/src/renderer/components/requirements/RequirementsView.tsx
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -9,13 +9,15 @@ import {
 import { setupBrdListeners, useBrdStore } from '../../stores/brd-store';
 import { setupRequirementsListeners, useRequirementsStore } from '../../stores/requirements-store';
 import { BrdEditor } from './BrdEditor';
+import { BrdCommitDialog } from './BrdCommitDialog';
 import { BrdList } from './BrdList';
 import { NewBrdDialog } from './NewBrdDialog';
 
 export function RequirementsView({ projectId }: { projectId: string }) {
   const { t } = useTranslation('requirements');
-  const { brds, selectedSlug, load, select, create, reset, error } = useBrdStore();
+  const { brds, selectedSlug, load, select, create, reset, error, changes, refreshChanges } = useBrdStore();
   const [showNew, setShowNew] = useState(false);
+  const [showCommit, setShowCommit] = useState(false);
   /** Slug to open after the user discards changes; '__new__' opens the New BRD dialog. */
   const [pendingSlug, setPendingSlug] = useState<string | null>(null);
 
@@ -30,11 +32,25 @@ export function RequirementsView({ projectId }: { projectId: string }) {
       useBrdStore.setState({ pendingOpenSlug: null });
       void select(projectId, pending, { force: true });
     });
+    void refreshChanges(projectId);
     return () => {
       stop();
       stopRequirements();
     };
-  }, [projectId, load, reset, select]);
+  }, [projectId, load, reset, select, refreshChanges]);
+
+  // Re-read the git state of docs/brd after each document or requirements save.
+  const savedContent = useBrdStore((s) => s.savedContent);
+  const savedSet = useRequirementsStore((s) => s.savedSet);
+  const isFirstSaveEffect = useRef(true);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: savedContent and savedSet are change triggers, not values read here
+  useEffect(() => {
+    if (isFirstSaveEffect.current) {
+      isFirstSaveEffect.current = false;
+      return;
+    }
+    void refreshChanges(projectId);
+  }, [savedContent, savedSet, projectId, refreshChanges]);
 
   /** Either the document or its requirements set has unsaved edits. */
   const anyDirty = () => useBrdStore.getState().isDirty() || useRequirementsStore.getState().isDirty();
@@ -54,6 +70,8 @@ export function RequirementsView({ projectId }: { projectId: string }) {
         selectedSlug={selectedSlug}
         onSelect={(s) => void handleSelect(s)}
         onNew={() => (anyDirty() ? setPendingSlug('__new__') : setShowNew(true))}
+        changeCount={changes?.files.length}
+        onCommit={changes ? () => setShowCommit(true) : undefined}
       />
       <div className="min-h-0">
         {error && !selectedSlug && <p className="px-4 pt-4 text-sm text-destructive">{error}</p>}
@@ -63,6 +81,8 @@ export function RequirementsView({ projectId }: { projectId: string }) {
           <div className="flex h-full items-center justify-center text-sm text-muted-foreground">{t('editor.noSelection')}</div>
         )}
       </div>
+
+      <BrdCommitDialog open={showCommit} onOpenChange={setShowCommit} projectId={projectId} />
 
       <NewBrdDialog
         open={showNew}

@@ -12,6 +12,8 @@ const api = {
   onBrdDraftChunk: vi.fn(),
   onBrdDraftDone: vi.fn(),
   onBrdDraftError: vi.fn(),
+  brdChanges: vi.fn(),
+  brdCommit: vi.fn(),
 };
 type Listener<T> = (payload: T) => void;
 let chunkCb: Listener<{ runId: string; text: string }> = () => {};
@@ -120,5 +122,28 @@ describe('brd-store', () => {
     await useBrdStore.getState().startDraft('p1', 'draft', 'notes');
     await useBrdStore.getState().cancelDraft();
     expect(api.brdDraftCancel).toHaveBeenCalledWith('r9');
+  });
+});
+
+describe('brd-store commits', () => {
+  it('refreshChanges stores changes, or null when the project is not a repo', async () => {
+    api.brdChanges.mockResolvedValueOnce({ success: true, data: { branch: 'develop', files: [{ path: 'docs/brd/a.md', status: 'modified' }] } });
+    await useBrdStore.getState().refreshChanges('p1');
+    expect(useBrdStore.getState().changes?.files).toHaveLength(1);
+    api.brdChanges.mockResolvedValueOnce({ success: false, error: 'Not a git repository' });
+    await useBrdStore.getState().refreshChanges('p1');
+    expect(useBrdStore.getState().changes).toBeNull();
+  });
+
+  it('commit records the result, refreshes changes, and reports errors', async () => {
+    api.brdCommit.mockResolvedValueOnce({ success: true, data: { commit: 'abc1234', pushed: true } });
+    api.brdChanges.mockResolvedValue({ success: true, data: { branch: 'develop', files: [] } });
+    expect(await useBrdStore.getState().commit('p1', 'msg', true)).toBe(true);
+    expect(api.brdCommit).toHaveBeenCalledWith('p1', 'msg', true);
+    expect(useBrdStore.getState().lastCommit).toEqual({ commit: 'abc1234', pushed: true });
+    expect(useBrdStore.getState().changes?.files).toEqual([]);
+    api.brdCommit.mockResolvedValueOnce({ success: false, error: 'nothing to commit' });
+    expect(await useBrdStore.getState().commit('p1', 'msg', false)).toBe(false);
+    expect(useBrdStore.getState().commitError).toBe('nothing to commit');
   });
 });
