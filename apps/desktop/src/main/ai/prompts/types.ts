@@ -20,6 +20,8 @@ export interface PromptContext {
   projectInstructions?: string | null;
   /** Pre-built `## PROJECT SKILLS` section (see ai/skills/prompt-section.ts). Empty/undefined = omit. */
   skillsSection?: string;
+  /** Pre-built `# Approved design briefs` section (see ai/agent/design-prompt.ts). Empty/undefined = omit. */
+  designSection?: string;
   /** Base branch name for git comparisons (e.g., "main", "develop") */
   baseBranch?: string;
   /** Human input from HUMAN_INPUT.md (for coder prompts) */

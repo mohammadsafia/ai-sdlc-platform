@@ -46,6 +46,7 @@ import { getPhaseThinking } from '../config/phase-config';
 import { TaskLogWriter } from '../logging/task-log-writer';
 import { loadProjectInstructions, injectContext } from '../prompts/prompt-loader';
 import { buildSkillsSectionForAgent, resolveEffectiveAgentType } from './skills-prompt';
+import { buildDesignSectionForAgent } from './design-prompt';
 import { createMcpClientsForAgent, mergeMcpTools, closeAllMcpClients } from '../mcp/client';
 import type { McpClientResult } from '../mcp/types';
 import { runProjectIndexer } from '../project/project-indexer';
@@ -239,12 +240,17 @@ async function assemblePrompt(
   if (skillsSection) {
     postLog(`Project skills injected for ${effectiveAgentType} (${(skillsSection.length / 1024).toFixed(1)}KB)`);
   }
+  const designSection = await buildDesignSectionForAgent(session.projectDir, session.specDir, effectiveAgentType);
+  if (designSection) {
+    postLog(`Design briefs injected for ${effectiveAgentType} (${(designSection.length / 1024).toFixed(1)}KB)`);
+  }
 
   return injectContext(basePrompt, {
     specDir: session.specDir,
     projectDir: session.projectDir,
     projectInstructions: cachedProjectInstructions,
     skillsSection,
+    designSection,
   });
 }
 

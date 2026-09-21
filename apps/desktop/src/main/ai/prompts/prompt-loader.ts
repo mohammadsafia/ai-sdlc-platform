@@ -248,6 +248,11 @@ export function injectContext(promptTemplate: string, context: PromptContext): s
     sections.push(context.skillsSection);
   }
 
+  // 4c. Approved design briefs for the requirements this task covers
+  if (context.designSection) {
+    sections.push(context.designSection);
+  }
+
   // 5. Base prompt
   sections.push(promptTemplate);
 
