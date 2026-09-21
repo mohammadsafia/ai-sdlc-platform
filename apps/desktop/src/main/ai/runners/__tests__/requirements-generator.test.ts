@@ -15,6 +15,13 @@ const validBody = {
   milestones: [{ name: 'm', description: 'd', order: 1 }],
   tasks: [{ title: 't', description: 'd', milestoneId: 'M1', requirementIds: ['R1'], category: 'feature', order: 1 }],
 };
+/** What the runner emits: missing ids and changeSummary are defaulted to null before validation. */
+const normalizedBody = {
+  requirements: validBody.requirements.map((r) => ({ ...r, id: null })),
+  milestones: validBody.milestones.map((m) => ({ ...m, id: null })),
+  tasks: validBody.tasks.map((t) => ({ ...t, id: null })),
+  changeSummary: null,
+};
 const previous: RequirementsSet = {
   version: 1, brdSlug: 'a', brdHash: 'h', status: 'draft', generatedAt: 't',
   requirements: [{ id: 'R1', title: 'r', description: 'd', acceptanceCriteria: ['x'], area: 'A', needsDesign: false, included: true }],
@@ -55,7 +62,7 @@ describe('runRequirementsGenerator', () => {
     const events: unknown[] = [];
     await runRequirementsGenerator({ projectDir: '/p', mode: 'generate', brdMarkdown: '#' }, (e) => events.push(e));
     expect(events[0]).toEqual({ type: 'progress', phase: 'started' });
-    expect(events.at(-1)).toEqual({ type: 'done', body: validBody });
+    expect(events.at(-1)).toEqual({ type: 'done', body: normalizedBody });
     expect(generateText).toHaveBeenCalledTimes(1);
     expect(generateText.mock.calls[0][0]).toMatchObject({ output: { kind: 'object' } });
   });
@@ -65,7 +72,7 @@ describe('runRequirementsGenerator', () => {
     const events: unknown[] = [];
     await runRequirementsGenerator({ projectDir: '/p', mode: 'generate', brdMarkdown: '#' }, (e) => events.push(e));
     expect(events).toContainEqual({ type: 'progress', phase: 'parsing' });
-    expect(events.at(-1)).toEqual({ type: 'done', body: validBody });
+    expect(events.at(-1)).toEqual({ type: 'done', body: normalizedBody });
   });
 
   it('retries once with validation errors, then errors out', async () => {

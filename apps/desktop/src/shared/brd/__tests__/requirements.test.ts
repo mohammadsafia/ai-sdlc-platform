@@ -28,11 +28,12 @@ describe('schemas', () => {
     expect(RequirementsSetSchema.safeParse(set()).success).toBe(true);
     expect(RequirementsSetSchema.safeParse(set({ tasks: [{ ...task('T1', 'M1', ['R1']), category: 'chore' as never }] })).success).toBe(false);
   });
-  it('GeneratedBodySchema allows missing ids and changeSummary', () => {
+  it('GeneratedBodySchema takes null ids and a null changeSummary for new items', () => {
     const body: GeneratedBody = {
-      requirements: [{ title: 'a', description: 'd', acceptanceCriteria: ['x'], area: 'A', needsDesign: true }],
-      milestones: [{ name: 'm', description: 'd', order: 1 }],
-      tasks: [{ title: 't', description: 'd', milestoneId: 'M1', requirementIds: ['R1'], category: 'docs', order: 1 }],
+      requirements: [{ id: null, title: 'a', description: 'd', acceptanceCriteria: ['x'], area: 'A', needsDesign: true }],
+      milestones: [{ id: null, name: 'm', description: 'd', order: 1 }],
+      tasks: [{ id: null, title: 't', description: 'd', milestoneId: 'M1', requirementIds: ['R1'], category: 'docs', order: 1 }],
+      changeSummary: null,
     };
     expect(GeneratedBodySchema.safeParse(body).success).toBe(true);
   });
@@ -42,6 +43,25 @@ describe('model-facing schema', () => {
   it('emits no numeric constraints, which Anthropic structured outputs reject', () => {
     const json = JSON.stringify(z.toJSONSchema(GeneratedBodySchema));
     expect(json).not.toMatch(/exclusiveMinimum|exclusiveMaximum|"minimum"|"maximum"|"integer"/);
+  });
+
+  it('lists every property as required at every level, as OpenAI strict mode demands', () => {
+    const schema = z.toJSONSchema(GeneratedBodySchema, { io: 'output' }) as Record<string, unknown>;
+    const offenders: string[] = [];
+    const walk = (node: unknown, path: string) => {
+      if (!node || typeof node !== 'object') return;
+      const n = node as Record<string, unknown>;
+      if (n.type === 'object' && n.properties && typeof n.properties === 'object') {
+        const keys = Object.keys(n.properties as object);
+        const required = new Set((n.required as string[] | undefined) ?? []);
+        for (const k of keys) if (!required.has(k)) offenders.push(`${path}.${k}`);
+        for (const [k, v] of Object.entries(n.properties as object)) walk(v, `${path}.${k}`);
+      }
+      if (n.items) walk(n.items, `${path}[]`);
+      for (const alt of (n.anyOf as unknown[] | undefined) ?? []) walk(alt, path);
+    };
+    walk(schema, '$');
+    expect(offenders).toEqual([]);
   });
 
   it('assignIds normalizes order to a positive integer', () => {

@@ -12,10 +12,11 @@ export function RequirementsAssist({ projectId }: { projectId: string }) {
   const { t } = useTranslation('requirements');
   const [feedback, setFeedback] = useState('');
   const { set, selection, run, refine, accept, discard } = useRequirementsStore();
-  if (!set) return null;
   const busy = run.status === 'running';
   const proposal = run.status === 'proposal' ? run.proposal : undefined;
-  const counts = proposal ? diffSets(set, proposal.set) : null;
+  // Before the first generation there is no set: every proposed item counts as added.
+  const counts = proposal ? diffSets(set ?? { ...proposal.set, requirements: [], milestones: [], tasks: [] }, proposal.set) : null;
+  if (!set && !proposal) return null;
 
   return (
     <div className="space-y-3 rounded-md border border-border p-3">
@@ -23,14 +24,18 @@ export function RequirementsAssist({ projectId }: { projectId: string }) {
         <Sparkles className="h-4 w-4" />
         {t('set.assist.title')}
       </div>
-      <label className="block text-xs font-medium" htmlFor="req-feedback">{t('set.assist.feedbackLabel')}</label>
-      <Textarea id="req-feedback" aria-label={t('set.assist.feedbackLabel')} rows={3} value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder={t('set.assist.feedbackPlaceholder')} disabled={busy} />
-      <div className="flex items-center gap-2">
-        <Button size="sm" disabled={busy || feedback.trim().length === 0} onClick={() => void refine(projectId, feedback)}>
-          {selection.length > 0 ? t('set.assist.refineSelected', { count: selection.length }) : t('set.assist.refineSet')}
-        </Button>
-        {run.error && <span className="text-xs text-destructive">{t('set.assist.error', { error: run.error })}</span>}
-      </div>
+      {set && (
+        <>
+          <label className="block text-xs font-medium" htmlFor="req-feedback">{t('set.assist.feedbackLabel')}</label>
+          <Textarea id="req-feedback" aria-label={t('set.assist.feedbackLabel')} rows={3} value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder={t('set.assist.feedbackPlaceholder')} disabled={busy} />
+          <div className="flex items-center gap-2">
+            <Button size="sm" disabled={busy || feedback.trim().length === 0} onClick={() => void refine(projectId, feedback)}>
+              {selection.length > 0 ? t('set.assist.refineSelected', { count: selection.length }) : t('set.assist.refineSet')}
+            </Button>
+            {run.error && <span className="text-xs text-destructive">{t('set.assist.error', { error: run.error })}</span>}
+          </div>
+        </>
+      )}
       {proposal && counts && (
         <div className="rounded-md border border-border bg-muted/30 p-3 text-sm">
           <div className="font-medium">{t('set.assist.proposalTitle')}</div>

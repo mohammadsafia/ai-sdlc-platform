@@ -44,12 +44,12 @@ export interface RequirementsSet {
   tasks: ProposedTask[];
 }
 
-/** Model output before post-processing. Ids are optional (echoed back during refinement). */
+/** Model output before post-processing. Ids are null for new items and echoed back during refinement. */
 export interface GeneratedBody {
-  requirements: Array<Omit<Requirement, 'id' | 'included'> & { id?: string }>;
-  milestones: Array<Omit<Milestone, 'id' | 'included'> & { id?: string }>;
-  tasks: Array<Omit<ProposedTask, 'id' | 'included'> & { id?: string }>;
-  changeSummary?: string;
+  requirements: Array<Omit<Requirement, 'id' | 'included'> & { id?: string | null }>;
+  milestones: Array<Omit<Milestone, 'id' | 'included'> & { id?: string | null }>;
+  tasks: Array<Omit<ProposedTask, 'id' | 'included'> & { id?: string | null }>;
+  changeSummary?: string | null;
 }
 
 export interface SectionCounts { added: number; changed: number; removed: number }

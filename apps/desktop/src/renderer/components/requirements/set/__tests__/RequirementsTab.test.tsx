@@ -65,6 +65,17 @@ describe('RequirementsTab', () => {
     expect(screen.getByRole('button', { name: 'set.assist.refineSelected:1' })).toBeInTheDocument();
   });
 
+  it('shows the first-generation proposal when there is no set yet, and Accept installs it', () => {
+    useRequirementsStore.setState({ set: null, savedSet: null, run: { status: 'proposal', runId: 'r1', proposal: { set, warnings: [] } } });
+    render(<RequirementsTab projectId="p1" brdReady={true} missingSections={[]} />);
+    expect(screen.queryByRole('button', { name: 'set.generate' })).not.toBeInTheDocument();
+    expect(screen.getByText('set.assist.proposalTitle')).toBeInTheDocument();
+    expect(screen.queryByLabelText('set.assist.feedbackLabel')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'set.assist.accept' }));
+    expect(screen.getByDisplayValue('Signup wizard')).toBeInTheDocument();
+    expect(useRequirementsStore.getState().run.status).toBe('idle');
+  });
+
   it('shows a proposal with counts and accept installs it', () => {
     const proposed = { ...set, requirements: [{ ...set.requirements[0], title: 'Renamed' }] };
     useRequirementsStore.setState({ set, savedSet: set, warnings: [], run: { status: 'proposal', runId: 'r1', proposal: { set: proposed, changeSummary: 'renamed', warnings: [] } } });

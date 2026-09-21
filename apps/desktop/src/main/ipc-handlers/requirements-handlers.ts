@@ -119,7 +119,7 @@ export function registerRequirementsHandlers(getMainWindow: () => BrowserWindow 
         }
         if (request.mode === 'refine' && previous) {
           const { set, warnings } = mergeRefinement(previous, event.body, request.selection);
-          safeSendToRenderer(getMainWindow, IPC_CHANNELS.REQUIREMENTS_DONE, { runId, set, changeSummary: event.body.changeSummary, warnings });
+          safeSendToRenderer(getMainWindow, IPC_CHANNELS.REQUIREMENTS_DONE, { runId, set, changeSummary: event.body.changeSummary ?? undefined, warnings });
         } else {
           const assigned = assignIds(event.body);
           const set: RequirementsSet = {

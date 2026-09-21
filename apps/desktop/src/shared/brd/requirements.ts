@@ -13,13 +13,17 @@ import {
 } from '../types/requirements';
 
 const idSchema = z.string().regex(/^[RMT]\d+$/);
-/** Model-facing: a plain number. Anthropic structured outputs reject integer/min/max constraints in the schema. */
+/**
+ * Model-facing schema rules: Anthropic structured outputs reject integer/min/max constraints,
+ * and OpenAI strict mode requires every property to be present, so optional fields are
+ * expressed as nullable (`T | null`) rather than omitted.
+ */
 const orderForModel = z.number().describe('Position, starting at 1');
 /** On disk: a positive integer. */
 const orderStored = z.number().int().positive();
 
 const requirementBody = z.object({
-  id: idSchema.optional(),
+  id: idSchema.nullable(),
   title: z.string().min(1),
   description: z.string(),
   acceptanceCriteria: z.array(z.string().min(1)),
@@ -27,13 +31,13 @@ const requirementBody = z.object({
   needsDesign: z.boolean(),
 });
 const milestoneBody = z.object({
-  id: idSchema.optional(),
+  id: idSchema.nullable(),
   name: z.string().min(1),
   description: z.string(),
   order: orderForModel,
 });
 const taskBody = z.object({
-  id: idSchema.optional(),
+  id: idSchema.nullable(),
   title: z.string().min(1),
   description: z.string(),
   milestoneId: z.string().min(1),
@@ -46,7 +50,7 @@ export const GeneratedBodySchema = z.object({
   requirements: z.array(requirementBody),
   milestones: z.array(milestoneBody),
   tasks: z.array(taskBody),
-  changeSummary: z.string().optional(),
+  changeSummary: z.string().nullable(),
 });
 
 export const RequirementsSetSchema = z.object({

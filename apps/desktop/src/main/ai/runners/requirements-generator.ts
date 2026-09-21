@@ -6,6 +6,7 @@
  * validation retry. Never writes files.
  */
 import { generateText, Output } from 'ai';
+import { z } from 'zod';
 
 import { GeneratedBodySchema } from '../../../shared/brd/requirements';
 import type { GeneratedBody, RequirementsRunMode, RequirementsRunPhase, RequirementsSet } from '../../../shared/types/requirements';
@@ -87,12 +88,13 @@ export async function runRequirementsGenerator(
       });
       // biome-ignore lint/suspicious/noExplicitAny: result.output type varies with the OUTPUT generic
       const anyResult = result as any;
-      const direct = anyResult.output != null ? GeneratedBodySchema.safeParse(anyResult.output) : null;
+      const direct = anyResult.output != null ? GeneratedBodySchema.safeParse(withNullDefaults(anyResult.output)) : null;
       if (direct?.success) return { body: direct.data as GeneratedBody, text: String(anyResult.text ?? '') };
       onEvent({ type: 'progress', phase: 'parsing' });
       const text = String(anyResult.text ?? '');
-      const parsed = parseLLMJson(text, GeneratedBodySchema);
-      return { body: parsed ? (parsed as GeneratedBody) : null, text };
+      const raw = parseLLMJson(text, z.unknown());
+      const parsed = raw == null ? null : GeneratedBodySchema.safeParse(withNullDefaults(raw));
+      return { body: parsed?.success ? (parsed.data as GeneratedBody) : null, text };
     };
 
     const first = await call(prompt);
@@ -102,7 +104,7 @@ export async function runRequirementsGenerator(
     }
 
     onEvent({ type: 'progress', phase: 'repairing' });
-    const validation = GeneratedBodySchema.safeParse(safeJson(first.text));
+    const validation = GeneratedBodySchema.safeParse(withNullDefaults(safeJson(first.text)));
     const errors = validation.success ? ['Output was not valid JSON'] : formatZodErrors(validation.error);
     const retry = await call(`${prompt}\n\n${buildValidationRetryPrompt('requirements set', errors)}`);
     if (retry.body) {
@@ -113,6 +115,26 @@ export async function runRequirementsGenerator(
   } catch (err: unknown) {
     onEvent({ type: 'error', error: err instanceof Error ? err.message : String(err) });
   }
+}
+
+/**
+ * The model-facing schema requires `id` and `changeSummary` as nullable keys (OpenAI strict
+ * mode forbids optional properties). A model answering in plain text may still omit them,
+ * so fill the gaps with null before validating.
+ */
+function withNullDefaults(raw: unknown): unknown {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return raw;
+  const body = { ...(raw as Record<string, unknown>) };
+  for (const section of ['requirements', 'milestones', 'tasks'] as const) {
+    const items = body[section];
+    if (Array.isArray(items)) {
+      body[section] = items.map((item) =>
+        item && typeof item === 'object' && !Array.isArray(item) && !('id' in item) ? { ...item, id: null } : item,
+      );
+    }
+  }
+  if (!('changeSummary' in body)) body.changeSummary = null;
+  return body;
 }
 
 function safeJson(text: string): unknown {

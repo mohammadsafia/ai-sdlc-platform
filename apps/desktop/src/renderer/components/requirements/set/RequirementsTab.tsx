@@ -41,7 +41,11 @@ export function RequirementsTab({ projectId, brdReady, missingSections }: Requir
           <p className="text-amber-600">{t('set.notReady')} {missingSections.join(', ')}</p>
         )}
         {run.error && <p className="text-destructive">{t('set.error', { error: run.error })}</p>}
-        <Button size="sm" disabled={!brdReady} onClick={() => void generate(projectId)}>{t('set.generate')}</Button>
+        {run.status === 'proposal' ? (
+          <RequirementsAssist projectId={projectId} />
+        ) : (
+          <Button size="sm" disabled={!brdReady} onClick={() => void generate(projectId)}>{t('set.generate')}</Button>
+        )}
       </div>
     );
   }
