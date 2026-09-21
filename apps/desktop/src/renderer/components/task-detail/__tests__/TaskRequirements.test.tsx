@@ -7,14 +7,18 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TaskRequirements } from '../TaskRequirements';
 import type { Task } from '../../../../shared/types';
+import { useDesignStore } from '../../../stores/design-store';
+import { DesignNavigationProvider } from '../../../contexts/DesignNavigationContext';
 
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }));
 
 const brdRead = vi.fn();
 const requirementsRead = vi.fn();
+const designList = vi.fn().mockResolvedValue({ success: true, data: [] });
 beforeEach(() => {
   vi.clearAllMocks();
-  (window as unknown as { electronAPI: unknown }).electronAPI = { brdRead, requirementsRead };
+  (window as unknown as { electronAPI: unknown }).electronAPI = { brdRead, requirementsRead, designList };
+  useDesignStore.getState().reset();
 });
 
 const set = {
@@ -55,5 +59,20 @@ describe('TaskRequirements', () => {
     const { container: c2 } = render(<TaskRequirements task={task} />);
     await new Promise((r) => setTimeout(r, 0));
     expect(c2).toBeEmptyDOMElement();
+  });
+
+  it('shows a design chip for needsDesign requirements', async () => {
+    brdRead.mockResolvedValue({ success: true, data: { summary: { slug: 'todo-app', title: 'Todo app', status: 'draft', modifiedAt: 't' }, content: '' } });
+    requirementsRead.mockResolvedValue({ success: true, data: { set: { ...set, requirements: [{ ...set.requirements[0], needsDesign: true }, set.requirements[1]] }, currentBrdHash: 'H' } });
+    const navigate = vi.fn();
+    render(
+      <DesignNavigationProvider navigate={navigate}>
+        <TaskRequirements task={task} />
+      </DesignNavigationProvider>,
+    );
+    fireEvent.click(await screen.findByRole('button', { name: 'view.title R1' }));
+    expect(navigate).toHaveBeenCalledWith('todo-app', 'R1');
+    expect(screen.getByText('status.none')).toBeInTheDocument();
+    expect(designList).toHaveBeenCalledWith('p1');
   });
 });

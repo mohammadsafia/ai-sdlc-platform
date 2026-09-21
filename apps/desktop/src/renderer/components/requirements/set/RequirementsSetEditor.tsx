@@ -14,6 +14,7 @@ import { Input } from '../../ui/input';
 import { Textarea } from '../../ui/textarea';
 import { cn } from '../../../lib/utils';
 import { useProjectEnvStore } from '../../../stores/project-env-store';
+import { DesignStatusChip } from '../../design/DesignStatusChip';
 import { useRequirementsStore } from '../../../stores/requirements-store';
 import { useTaskStore } from '../../../stores/task-store';
 
@@ -58,6 +59,7 @@ export function RequirementsSetEditor({ projectId }: { projectId: string }) {
   const { set, selection, edit, toggleInclude, toggleSelect, moveMilestone, release, releaseReason, isReleasing, pushToJira, isPushing } = useRequirementsStore();
   const jiraEnabled = useProjectEnvStore((s) => s.envConfig?.jiraEnabled ?? false);
   const jiraBaseUrl = useProjectEnvStore((s) => s.envConfig?.jiraBaseUrl ?? '');
+  const brdSlug = useRequirementsStore((s) => s.slug);
   const tasks = useTaskStore((s) => s.tasks);
   // Derived once per set: a selector returning a fresh Set each render would loop.
   const locked = useMemo(() => (set ? computeLockedIds(set) : new Set<string>()), [set]);
@@ -119,6 +121,7 @@ export function RequirementsSetEditor({ projectId }: { projectId: string }) {
           <span className="flex items-end gap-2 pb-2 text-xs">
             <Checkbox aria-label={`${t('set.fields.needsDesign')} ${r.id}`} checked={r.needsDesign} disabled={lockedR} onCheckedChange={() => edit('requirements', r.id, { needsDesign: !r.needsDesign })} />
             {t('set.fields.needsDesign')}
+            {r.needsDesign && brdSlug && <DesignStatusChip brdSlug={brdSlug} requirementId={r.id} />}
           </span>
         </div>
         <div className="text-xs">

@@ -9,6 +9,8 @@ import { RequirementsSetEditor } from '../RequirementsSetEditor';
 import { useRequirementsStore } from '../../../../stores/requirements-store';
 import { useTaskStore } from '../../../../stores/task-store';
 import { useProjectEnvStore } from '../../../../stores/project-env-store';
+import { useDesignStore } from '../../../../stores/design-store';
+import { DesignNavigationProvider } from '../../../../contexts/DesignNavigationContext';
 import type { RequirementsSet } from '../../../../../shared/types/requirements';
 import type { Task } from '../../../../../shared/types';
 
@@ -118,5 +120,21 @@ describe('RequirementsSetEditor Jira chips', () => {
     render(<RequirementsSetEditor projectId="p1" />);
     expect(screen.queryByText('chip.epic:ACME-1')).not.toBeInTheDocument();
     expect(screen.queryByText('ACME-2')).not.toBeInTheDocument();
+  });
+});
+
+describe('RequirementsSetEditor design chips', () => {
+  it('shows the brief status next to needsDesign requirements and navigates', () => {
+    useDesignStore.setState({ briefs: [{ brdSlug: 'a', requirementId: 'R1', title: 'x', status: 'approved', modifiedAt: 't' }] });
+    useRequirementsStore.setState({ slug: 'a', set, savedSet: set, currentBrdHash: 'H' });
+    const navigate = vi.fn();
+    render(
+      <DesignNavigationProvider navigate={navigate}>
+        <RequirementsSetEditor projectId="p1" />
+      </DesignNavigationProvider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'view.title R1' }));
+    expect(navigate).toHaveBeenCalledWith('a', 'R1');
+    expect(screen.getByText('status.approved')).toBeInTheDocument();
   });
 });

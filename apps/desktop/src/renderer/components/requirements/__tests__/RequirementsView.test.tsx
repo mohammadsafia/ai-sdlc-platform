@@ -23,6 +23,7 @@ const api = {
   onRequirementsProgress: vi.fn(() => () => undefined),
   onRequirementsDone: vi.fn(() => () => undefined),
   onRequirementsError: vi.fn(() => () => undefined),
+  designList: vi.fn().mockResolvedValue({ success: true, data: [] }),
   brdChanges: vi.fn().mockResolvedValue({ success: true, data: { branch: 'develop', files: [{ path: 'docs/brd/a.md', status: 'modified' }] } }),
 };
 const doc = '---\ntitle: A\nstatus: draft\ncreated: 2026-09-20\n---\n# A\n';

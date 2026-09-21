@@ -5,6 +5,8 @@ import { ClipboardList, ExternalLink } from 'lucide-react';
 
 import type { Task } from '../../../shared/types';
 import type { RequirementsSet } from '../../../shared/types/requirements';
+import { useDesignStore } from '../../stores/design-store';
+import { DesignStatusChip } from '../design/DesignStatusChip';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 
@@ -44,6 +46,10 @@ export function TaskRequirements({ task, onOpenBrd }: TaskRequirementsProps) {
     };
   }, [task.projectId, slug]);
 
+  useEffect(() => {
+    if (slug) void useDesignStore.getState().loadBriefs(task.projectId);
+  }, [task.projectId, slug]);
+
   if (!slug || !data) return null;
 
   const milestone = data.set.milestones.find((m) => m.id === task.metadata?.milestoneId);
@@ -79,6 +85,7 @@ export function TaskRequirements({ task, onOpenBrd }: TaskRequirementsProps) {
               <li key={r.id} className="flex items-center gap-2">
                 <Badge variant="outline" className="font-mono">{r.id}</Badge>
                 <span>{r.title}</span>
+                {r.needsDesign && <DesignStatusChip brdSlug={slug} requirementId={r.id} />}
               </li>
             ))}
           </ul>

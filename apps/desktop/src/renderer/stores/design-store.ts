@@ -40,6 +40,8 @@ interface DesignState {
   reset: () => void;
   requestOpen: (brdSlug: string, requirementId: string) => void;
   load: (projectId: string) => Promise<void>;
+  /** Refreshes only the brief summaries (used by status chips outside the Design view). */
+  loadBriefs: (projectId: string) => Promise<void>;
   select: (projectId: string, brdSlug: string, requirementId: string, opts?: { force?: boolean }) => Promise<boolean>;
   setContent: (content: string) => void;
   save: (projectId: string) => Promise<void>;
@@ -98,6 +100,11 @@ export const useDesignStore = create<DesignState>((set, get) => ({
       if (requirements) requirementsBySlug[brd.slug] = { title: brd.title, requirements };
     }
     set({ requirementsBySlug, briefs: briefs.success && briefs.data ? briefs.data : [], isLoading: false });
+  },
+
+  loadBriefs: async (projectId) => {
+    const briefs = await window.electronAPI.designList(projectId);
+    if (briefs.success && briefs.data) set({ briefs: briefs.data });
   },
 
   select: async (projectId, brdSlug, requirementId, opts) => {

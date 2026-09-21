@@ -7,6 +7,7 @@ import {
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '../ui/alert-dialog';
 import { setupBrdListeners, useBrdStore } from '../../stores/brd-store';
+import { useDesignStore } from '../../stores/design-store';
 import { setupRequirementsListeners, useRequirementsStore } from '../../stores/requirements-store';
 import { BrdEditor } from './BrdEditor';
 import { BrdCommitDialog } from './BrdCommitDialog';
@@ -33,6 +34,7 @@ export function RequirementsView({ projectId }: { projectId: string }) {
       void select(projectId, pending, { force: true });
     });
     void refreshChanges(projectId);
+    void useDesignStore.getState().loadBriefs(projectId);
     return () => {
       stop();
       stopRequirements();
