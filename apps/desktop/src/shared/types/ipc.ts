@@ -139,7 +139,12 @@ import type {
   GitLabInvestigationStatus,
   GitLabMRReviewResult,
   GitLabMRReviewProgress,
-  GitLabNewCommitsCheck
+  GitLabNewCommitsCheck,
+  JiraConnectionStatus,
+  JiraImportResult,
+  JiraMetadata,
+  JiraSearchParams,
+  JiraSearchResult,
 } from './integrations';
 import type { APIProfile, ProfilesFile, TestConnectionResult, DiscoverModelsResult } from './profile';
 import type { ProviderAccount } from './provider-account';
@@ -837,6 +842,13 @@ export interface ElectronAPI {
   requirementsGenerate: (projectId: string, request: RequirementsGenerateRequest) => Promise<IPCResult<{ runId: string }>>;
   requirementsCancel: (runId: string) => Promise<IPCResult>;
   requirementsRelease: (projectId: string, slug: string, milestoneId: string) => Promise<IPCResult<{ set: RequirementsSet; tasks: Task[] }>>;
+  // Jira integration
+  jiraCheckConnection: (projectId: string) => Promise<IPCResult<JiraConnectionStatus>>;
+  jiraGetMetadata: (projectId: string) => Promise<IPCResult<JiraMetadata>>;
+  jiraSearchIssues: (projectId: string, params: JiraSearchParams) => Promise<IPCResult<JiraSearchResult>>;
+  jiraImportIssues: (projectId: string, keys: string[]) => Promise<IPCResult<JiraImportResult>>;
+  jiraPushMilestone: (projectId: string, slug: string, milestoneId: string) => Promise<IPCResult<{ set: RequirementsSet; warnings: string[] }>>;
+  jiraRetrySync: (projectId: string, taskId: string) => Promise<IPCResult<{ synced: boolean; error?: string }>>;
   onRequirementsProgress: (callback: (p: RequirementsProgress) => void) => () => void;
   onRequirementsDone: (callback: (d: RequirementsDone) => void) => () => void;
   onRequirementsError: (callback: (e: RequirementsError) => void) => () => void;

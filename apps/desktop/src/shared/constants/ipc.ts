@@ -36,6 +36,13 @@ export const IPC_CHANNELS = {
   REQUIREMENTS_DONE: 'requirements:done',
   REQUIREMENTS_ERROR: 'requirements:error',
   REQUIREMENTS_RELEASE: 'requirements:release',
+  // Jira integration
+  JIRA_CHECK_CONNECTION: 'jira:checkConnection',
+  JIRA_GET_METADATA: 'jira:getMetadata',
+  JIRA_SEARCH_ISSUES: 'jira:searchIssues',
+  JIRA_IMPORT_ISSUES: 'jira:importIssues',
+  JIRA_PUSH_MILESTONE: 'jira:pushMilestone',
+  JIRA_RETRY_SYNC: 'jira:retrySync',
   PROJECT_CHECK_VERSION: 'project:checkVersion',
 
   // Tab state operations (persisted in main process)

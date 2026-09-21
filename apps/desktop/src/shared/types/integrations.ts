@@ -1,3 +1,5 @@
+import type { Task } from './task';
+
 /**
  * External integrations (Linear, GitHub)
  */
@@ -478,3 +480,16 @@ export interface RoadmapProviderConfig {
  * Canny-specific status values
  */
 export type CannyStatus = 'open' | 'under review' | 'planned' | 'in progress' | 'complete' | 'closed';
+
+// ============================================
+// Jira Integration Types
+// ============================================
+
+export interface JiraConnectionStatus { accountName: string; projectName?: string }
+export interface JiraMetadata { issueTypes: string[]; statuses: string[] }
+export interface JiraIssueSummary {
+  key: string; summary: string; status: string; issueType: string; assignee?: string; updated: string; url: string; imported: boolean;
+}
+export interface JiraSearchParams { jql?: string; status?: string; pageToken?: string }
+export interface JiraSearchResult { issues: JiraIssueSummary[]; nextPageToken?: string }
+export interface JiraImportResult { imported: number; skipped: string[]; failed: Array<{ key: string; error: string }>; tasks: Task[] }

@@ -21,6 +21,14 @@ import { safeSendToRenderer } from './utils';
 interface ActiveRun { runId: string; slug: string; controller: AbortController }
 const activeRuns = new Map<string, ActiveRun>(); // keyed by `${projectId}:${slug}`
 
+/** Take the per-slug lock shared by generation, release, and Jira pushes. Returns a release function, or null when busy. */
+export function tryAcquireSlugLock(projectId: string, slug: string): (() => void) | null {
+  const key = `${projectId}:${slug}`;
+  if (activeRuns.has(key)) return null;
+  activeRuns.set(key, { runId: randomUUID(), slug, controller: new AbortController() });
+  return () => activeRuns.delete(key);
+}
+
 const RELEASE_GATE_MESSAGES: Record<ReleaseGateReason, string> = {
   noSet: 'Generate and approve a requirements set before releasing a milestone',
   notApproved: 'Approve the requirements set before releasing a milestone',
@@ -165,9 +173,8 @@ export function registerRequirementsHandlers(getMainWindow: () => BrowserWindow 
     async (_e, projectId: string, slug: string, milestoneId: string): Promise<IPCResult<{ set: RequirementsSet; tasks: Task[] }>> => {
       const project = projectStore.getProject(projectId);
       if (!project) return { success: false, error: `Project not found: ${projectId}` };
-      const key = `${projectId}:${slug}`;
-      if (activeRuns.has(key)) return { success: false, error: 'A run is already in progress for this BRD' };
-      activeRuns.set(key, { runId: randomUUID(), slug, controller: new AbortController() });
+      const unlock = tryAcquireSlugLock(projectId, slug);
+      if (!unlock) return { success: false, error: 'A run is already in progress for this BRD' };
       try {
         const [stored, brd] = await Promise.all([readRequirements(project.path, slug), readBrd(project.path, slug)]);
         const reason = releaseGate(stored, stored, brdHash(brd.content), milestoneId);
@@ -201,7 +208,7 @@ export function registerRequirementsHandlers(getMainWindow: () => BrowserWindow 
       } catch (err) {
         return fail(err);
       } finally {
-        activeRuns.delete(key);
+        unlock();
       }
     },
   );
