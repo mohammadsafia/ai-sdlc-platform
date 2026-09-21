@@ -90,6 +90,7 @@ describe('requirements handlers', () => {
   });
 
   it('refine requires an existing set and merges with selection', async () => {
+    files.brdHash.mockReturnValueOnce('HASH-NOW');
     files.readRequirements.mockResolvedValue(null);
     expect(await handlers.get('requirements:generate')!({}, 'p1', { slug: 'a', mode: 'refine', feedback: 'x' })).toMatchObject({ success: false });
     files.readRequirements.mockResolvedValue(set);
@@ -103,6 +104,8 @@ describe('requirements handlers', () => {
     const done = sent.at(-1)![1] as { set: RequirementsSet; changeSummary?: string };
     expect(done.set.requirements[0].title).toBe('changed');
     expect(done.changeSummary).toBe('renamed R1');
+    // The model saw the current BRD, so the refined set is no longer stale
+    expect(done.set.brdHash).toBe('HASH-NOW');
   });
 
   it('rejects a concurrent run for the same slug and supports cancel', async () => {

@@ -129,7 +129,9 @@ export function registerRequirementsHandlers(getMainWindow: () => BrowserWindow 
           return;
         }
         if (request.mode === 'refine' && previous) {
-          const { set, warnings } = mergeRefinement(previous, event.body, request.selection);
+          const { set: merged, warnings } = mergeRefinement(previous, event.body, request.selection);
+          // The model was given the current BRD, so the refined set is current again.
+          const set: RequirementsSet = { ...merged, brdHash: hash };
           safeSendToRenderer(getMainWindow, IPC_CHANNELS.REQUIREMENTS_DONE, { runId, set, changeSummary: event.body.changeSummary ?? undefined, warnings });
         } else {
           const assigned = assignIds(event.body);
