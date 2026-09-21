@@ -1,0 +1,65 @@
+{
+  "settings": {
+    "enable": "Activer Jira",
+    "enableHint": "Publier les jalons dans Jira et importer des tickets Jira comme tâches",
+    "baseUrl": "URL du site",
+    "baseUrlPlaceholder": "https://votresociete.atlassian.net",
+    "email": "E-mail du compte Atlassian",
+    "apiToken": "Jeton d'API",
+    "apiTokenHint": "Créez-en un sur id.atlassian.com, rubrique Sécurité, jetons d'API",
+    "test": "Tester la connexion",
+    "testing": "Test…",
+    "connected": "Connecté en tant que {{name}}",
+    "connectedProject": "Connecté en tant que {{name}}, projet {{project}}",
+    "projectKey": "Clé du projet",
+    "issueType": "Type de ticket pour les tâches",
+    "epicIssueType": "Type de ticket pour les jalons",
+    "loadMetadata": "Charger depuis Jira",
+    "statusMap": "Correspondance des statuts",
+    "statusMapHint": "Vers quel statut Jira chaque statut Kanban déplace le ticket",
+    "notSynced": "Non synchronisé",
+    "kanbanStatus": {
+      "backlog": "Backlog",
+      "queue": "En file d'attente",
+      "in_progress": "En cours",
+      "ai_review": "Revue IA",
+      "human_review": "Revue humaine",
+      "done": "Terminé",
+      "pr_created": "PR créée",
+      "error": "Erreur"
+    }
+  },
+  "view": {
+    "title": "Tickets Jira",
+    "subtitle": "Importer des tickets de {{project}} comme tâches",
+    "notConnected": "Connectez Jira dans les paramètres du projet pour parcourir les tickets.",
+    "openSettings": "Ouvrir les paramètres Jira",
+    "statusFilter": "Statut",
+    "anyStatus": "Tous les statuts",
+    "jql": "Filtre JQL",
+    "jqlPlaceholder": "labels = backend AND priority = High",
+    "search": "Rechercher dans les résumés",
+    "refresh": "Actualiser",
+    "loadMore": "Charger plus",
+    "empty": "Aucun ticket ne correspond.",
+    "imported": "Importé",
+    "import": "Importer {{count}} sélectionné(s)",
+    "importing": "Importation…",
+    "importResult": "{{imported}} importé(s), {{skipped}} ignoré(s), {{failed}} en échec"
+  },
+  "chip": {
+    "push": "Publier dans Jira",
+    "pushing": "Publication…",
+    "partial": "Partiellement publié",
+    "epic": "Epic {{key}}"
+  },
+  "detail": {
+    "title": "Jira",
+    "issue": "Ticket",
+    "epic": "Epic",
+    "syncedStatus": "Dernier statut synchronisé",
+    "syncError": "Erreur de synchronisation",
+    "retry": "Réessayer",
+    "retrying": "Nouvelle tentative…"
+  }
+}

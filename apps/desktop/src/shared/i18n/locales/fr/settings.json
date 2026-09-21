@@ -394,6 +394,13 @@
       "integrationDescription": "Se connecter à GitLab pour le suivi des issues",
       "syncDescription": "Synchroniser avec GitLab Issues"
     },
+    "jira": {
+      "title": "Jira",
+      "description": "Synchronisation Jira Cloud",
+      "integrationTitle": "Intégration Jira",
+      "integrationDescription": "Publier les jalons et importer des tickets depuis Jira Cloud",
+      "syncDescription": "Synchroniser avec Jira"
+    },
     "skills": {
       "howToTitle": "Ajouter ou épingler des compétences",
       "howToLocal": "Ajoutez une compétence locale sous forme de dossier contenant un SKILL.md (name et description dans son en-tête) :",

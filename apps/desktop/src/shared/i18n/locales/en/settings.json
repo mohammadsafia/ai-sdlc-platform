@@ -394,6 +394,13 @@
       "integrationDescription": "Connect to GitLab for issue tracking",
       "syncDescription": "Sync with GitLab Issues"
     },
+    "jira": {
+      "title": "Jira",
+      "description": "Jira Cloud sync",
+      "integrationTitle": "Jira Integration",
+      "integrationDescription": "Push milestones and import issues from Jira Cloud",
+      "syncDescription": "Sync with Jira"
+    },
     "skills": {
       "howToTitle": "How to add or pin skills",
       "howToLocal": "Add a local skill as a folder with a SKILL.md (name and description in its frontmatter):",

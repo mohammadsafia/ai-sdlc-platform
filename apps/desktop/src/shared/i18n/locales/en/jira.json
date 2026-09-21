@@ -1,0 +1,65 @@
+{
+  "settings": {
+    "enable": "Enable Jira",
+    "enableHint": "Push released milestones to Jira and import Jira issues as tasks",
+    "baseUrl": "Site URL",
+    "baseUrlPlaceholder": "https://yourcompany.atlassian.net",
+    "email": "Atlassian account email",
+    "apiToken": "API token",
+    "apiTokenHint": "Create one at id.atlassian.com under Security, API tokens",
+    "test": "Test connection",
+    "testing": "Testing…",
+    "connected": "Connected as {{name}}",
+    "connectedProject": "Connected as {{name}}, project {{project}}",
+    "projectKey": "Project key",
+    "issueType": "Issue type for tasks",
+    "epicIssueType": "Issue type for milestones",
+    "loadMetadata": "Load from Jira",
+    "statusMap": "Status mapping",
+    "statusMapHint": "Which Jira status each Kanban status moves the issue to",
+    "notSynced": "Not synced",
+    "kanbanStatus": {
+      "backlog": "Backlog",
+      "queue": "Queued",
+      "in_progress": "In progress",
+      "ai_review": "AI review",
+      "human_review": "Human review",
+      "done": "Done",
+      "pr_created": "PR created",
+      "error": "Error"
+    }
+  },
+  "view": {
+    "title": "Jira Issues",
+    "subtitle": "Import issues from {{project}} as tasks",
+    "notConnected": "Connect Jira in project settings to browse issues.",
+    "openSettings": "Open Jira settings",
+    "statusFilter": "Status",
+    "anyStatus": "Any status",
+    "jql": "JQL filter",
+    "jqlPlaceholder": "labels = backend AND priority = High",
+    "search": "Search summaries",
+    "refresh": "Refresh",
+    "loadMore": "Load more",
+    "empty": "No issues match.",
+    "imported": "Imported",
+    "import": "Import {{count}} selected",
+    "importing": "Importing…",
+    "importResult": "{{imported}} imported, {{skipped}} skipped, {{failed}} failed"
+  },
+  "chip": {
+    "push": "Push to Jira",
+    "pushing": "Pushing…",
+    "partial": "Partially pushed",
+    "epic": "Epic {{key}}"
+  },
+  "detail": {
+    "title": "Jira",
+    "issue": "Issue",
+    "epic": "Epic",
+    "syncedStatus": "Last synced status",
+    "syncError": "Sync error",
+    "retry": "Retry sync",
+    "retrying": "Retrying…"
+  }
+}

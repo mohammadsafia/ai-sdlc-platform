@@ -6,6 +6,7 @@ import { SecuritySettings } from '../../project-settings/SecuritySettings';
 import { LinearIntegration } from '../integrations/LinearIntegration';
 import { GitHubIntegration } from '../integrations/GitHubIntegration';
 import { GitLabIntegration } from '../integrations/GitLabIntegration';
+import { JiraIntegration } from '../integrations/JiraIntegration';
 import { InitializationGuard } from '../common/InitializationGuard';
 import { SkillsSettings } from '../../project-settings/SkillsSettings';
 import type { ProjectSettingsSection } from '../ProjectSettingsContent';
@@ -166,6 +167,22 @@ export function SectionRouter({
               settings={settings}
               setSettings={setSettings}
             />
+          </InitializationGuard>
+        </SettingsSection>
+      );
+
+    case 'jira':
+      return (
+        <SettingsSection
+          title={t('projectSections.jira.integrationTitle')}
+          description={t('projectSections.jira.integrationDescription')}
+        >
+          <InitializationGuard
+            initialized={!!project.autoBuildPath}
+            title={t('projectSections.jira.integrationTitle')}
+            description={t('projectSections.jira.syncDescription')}
+          >
+            <JiraIntegration projectId={project.id} envConfig={envConfig} updateEnvConfig={updateEnvConfig} />
           </InitializationGuard>
         </SettingsSection>
       );
