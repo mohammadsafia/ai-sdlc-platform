@@ -18,6 +18,14 @@ vi.mock('@ai-sdk/openai', () => ({
   createOpenAI: vi.fn(() => {
     const provider = vi.fn((modelId: string) => ({ modelId, provider: 'openai' }));
     (provider as any).chat = vi.fn((modelId: string) => ({ modelId, provider: 'openai-chat' }));
+    (provider as any).responses = vi.fn((modelId: string) => ({
+      specificationVersion: 'v3',
+      provider: 'openai-responses',
+      modelId,
+      supportedUrls: {},
+      doGenerate: vi.fn(async () => ({ content: [], finishReason: 'stop', usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 }, warnings: [] })),
+      doStream: vi.fn(),
+    }));
     return provider;
   }),
 }));
@@ -192,5 +200,22 @@ describe('createProviderFromModelId', () => {
         baseURL: 'https://override.com',
       }),
     );
+  });
+});
+
+describe('createProvider — OpenAI Codex subscription (OAuth)', () => {
+  it('uses the Responses API and forces store=false so prior items are sent inline', async () => {
+    const model = createProvider({
+      config: { provider: SupportedProvider.OpenAI, apiKey: 'codex-oauth-placeholder', oauthTokenFilePath: '/tmp/codex-auth.json' },
+      modelId: 'gpt-6-astra',
+    }) as any;
+    expect(model.modelId).toBe('gpt-6-astra');
+    await model.doGenerate({ prompt: [], providerOptions: { openai: { reasoningEffort: 'high' } } });
+    const { createOpenAI } = await import('@ai-sdk/openai');
+    const instance = (createOpenAI as any).mock.results.at(-1).value;
+    const inner = instance.responses.mock.results.at(-1).value;
+    expect(inner.doGenerate).toHaveBeenCalledTimes(1);
+    const params = inner.doGenerate.mock.calls[0][0];
+    expect(params.providerOptions.openai).toEqual({ reasoningEffort: 'high', store: false });
   });
 });

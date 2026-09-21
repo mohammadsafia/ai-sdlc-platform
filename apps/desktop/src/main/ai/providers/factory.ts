@@ -18,7 +18,7 @@ import { createOpenAI } from '@ai-sdk/openai';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { createXai } from '@ai-sdk/xai';
-import type { LanguageModel } from 'ai';
+import { type LanguageModel, type LanguageModelMiddleware, wrapLanguageModel } from 'ai';
 
 import { MODEL_PROVIDER_MAP } from '../config/types';
 import { createOAuthProviderFetch } from './oauth-fetch';
@@ -164,6 +164,27 @@ function createProviderInstance(config: ProviderConfig) {
 }
 
 // =============================================================================
+// Codex Subscription Middleware
+// =============================================================================
+
+/**
+ * The Codex subscription backend does not persist items (`store` must be false).
+ * With `store: false` the SDK re-sends prior tool calls and reasoning inline
+ * instead of as `item_reference`s the backend cannot resolve, so every call
+ * through a Codex OAuth account gets `store: false` regardless of the caller.
+ */
+const codexSubscriptionMiddleware: LanguageModelMiddleware = {
+  specificationVersion: 'v3',
+  transformParams: async ({ params }) => ({
+    ...params,
+    providerOptions: {
+      ...params.providerOptions,
+      openai: { ...(params.providerOptions?.openai ?? {}), store: false },
+    },
+  }),
+};
+
+// =============================================================================
 // Codex Model Detection
 // =============================================================================
 
@@ -216,7 +237,13 @@ export function createProvider(options: CreateProviderOptions): LanguageModel {
   // format sent to Responses endpoint → 400). Regular API-key accounts use
   // `.responses()` for Codex models and `.chat()` for everything else.
   if (config.provider === SupportedProvider.OpenAI) {
-    if (config.oauthTokenFilePath || isCodexModel(modelId)) {
+    if (config.oauthTokenFilePath) {
+      return wrapLanguageModel({
+        model: (instance as ReturnType<typeof createOpenAI>).responses(modelId),
+        middleware: codexSubscriptionMiddleware,
+      });
+    }
+    if (isCodexModel(modelId)) {
       return (instance as ReturnType<typeof createOpenAI>).responses(modelId);
     }
     return (instance as ReturnType<typeof createOpenAI>).chat(modelId);

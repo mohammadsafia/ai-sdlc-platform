@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
+  ALL_AVAILABLE_MODELS,
+  DEFAULT_MODEL_EQUIVALENCES,
+  resolveModelEquivalent,
   getProviderPreset,
   getProviderPresetOrFallback,
   PROVIDER_PRESET_DEFINITIONS,
@@ -23,7 +26,7 @@ describe('getProviderPreset', () => {
   it('returns correct preset for openai provider', () => {
     const result = getProviderPreset('openai', 'auto');
     expect(result).not.toBeNull();
-    expect(result?.primaryModel).toBe('gpt-5.3-codex');
+    expect(result?.primaryModel).toBe('gpt-6-astra');
   });
 
   it('returns null for unknown presetId', () => {
@@ -53,7 +56,7 @@ describe('getProviderPresetOrFallback', () => {
 
   it('returns openai balanced preset exactly when available', () => {
     const result = getProviderPresetOrFallback('openai', 'balanced');
-    expect(result.primaryModel).toBe('gpt-5.2-codex');
+    expect(result.primaryModel).toBe('gpt-5.6-terra');
     expect(result.primaryThinking).toBe('medium');
   });
 
@@ -117,5 +120,28 @@ describe('getProviderPresetOrFallback', () => {
       expect(result.phaseModels[key]).toBeTruthy();
       expect(result.phaseThinking[key]).toBeTruthy();
     }
+  });
+});
+
+describe('OpenAI catalog (Codex subscription compatibility)', () => {
+  // The Codex backend rejects retired slugs for ChatGPT accounts with
+  // "The '<model>' model is not supported when using Codex with a ChatGPT account."
+  const RETIRED = ['gpt-5.3-codex', 'gpt-5.2-codex', 'gpt-5.1-codex-mini', 'gpt-5-codex', 'gpt-5.1-codex-max'];
+
+  it('offers no retired Codex slugs in the model list', () => {
+    const openaiIds = ALL_AVAILABLE_MODELS.filter((m) => m.provider === 'openai').map((m) => m.value);
+    expect(openaiIds.filter((id) => RETIRED.includes(id))).toEqual([]);
+    expect(openaiIds).toEqual(expect.arrayContaining(['gpt-6-astra', 'gpt-5.6-sol', 'gpt-5.6-terra', 'gpt-5.6-luna', 'gpt-5.5']));
+  });
+
+  it('maps Claude shorthands to current OpenAI models', () => {
+    expect(resolveModelEquivalent('opus', 'openai')?.modelId).toBe('gpt-6-astra');
+    expect(resolveModelEquivalent('sonnet', 'openai')?.modelId).toBe('gpt-5.6-terra');
+    expect(resolveModelEquivalent('haiku', 'openai')?.modelId).toBe('gpt-5.6-luna');
+  });
+
+  it('has no equivalence entry pointing at a retired slug', () => {
+    const targets = Object.values(DEFAULT_MODEL_EQUIVALENCES).flatMap((m) => (m.openai ? [m.openai.modelId] : []));
+    expect(targets.filter((id) => RETIRED.includes(id))).toEqual([]);
   });
 });

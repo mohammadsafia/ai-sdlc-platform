@@ -37,6 +37,12 @@ interface OAuthProviderSpec {
   clientId: string;
   /** Rewrite the request URL (e.g., to a subscription-specific endpoint) */
   rewriteUrl?: (url: string) => string;
+  /**
+   * Endpoints that only speak the Codex subscription dialect: `store` must be false
+   * and `stream` must be true. Non-streaming callers get the SSE stream collapsed
+   * back into a single JSON response.
+   */
+  codexEndpoints?: string[];
 }
 
 const CODEX_API_ENDPOINT = 'https://chatgpt.com/backend-api/codex/responses';
@@ -52,9 +58,84 @@ const OAUTH_PROVIDER_REGISTRY: Record<string, OAuthProviderSpec> = {
       }
       return url;
     },
+    codexEndpoints: [CODEX_API_ENDPOINT],
   },
   // Future OAuth providers: just add entries here
 };
+
+// =============================================================================
+// Codex Subscription Request/Response Adaptation
+// =============================================================================
+
+/**
+ * Adapt a JSON request body for the Codex subscription backend.
+ * Returns the (possibly rewritten) body and whether the caller asked for a stream.
+ */
+export function adaptCodexRequestBody(rawBody: unknown): { body: unknown; callerWantsStream: boolean; adapted: boolean } {
+  if (typeof rawBody !== 'string') return { body: rawBody, callerWantsStream: true, adapted: false };
+  let json: Record<string, unknown>;
+  try {
+    json = JSON.parse(rawBody) as Record<string, unknown>;
+  } catch {
+    return { body: rawBody, callerWantsStream: true, adapted: false };
+  }
+  if (!json || typeof json !== 'object' || Array.isArray(json)) return { body: rawBody, callerWantsStream: true, adapted: false };
+  const callerWantsStream = json.stream === true;
+  const next = { ...json, store: false, stream: true };
+  return { body: JSON.stringify(next), callerWantsStream, adapted: true };
+}
+
+/** Parse an SSE body into its `data:` payloads. */
+function parseSseEvents(text: string): Array<Record<string, unknown>> {
+  const events: Array<Record<string, unknown>> = [];
+  for (const block of text.split(/\n\n/)) {
+    const data = block
+      .split('\n')
+      .filter((line) => line.startsWith('data:'))
+      .map((line) => line.slice(5).trim())
+      .join('\n');
+    if (!data || data === '[DONE]') continue;
+    try {
+      events.push(JSON.parse(data) as Record<string, unknown>);
+    } catch {
+      // Ignore non-JSON frames
+    }
+  }
+  return events;
+}
+
+/**
+ * Collapse a Codex SSE stream into the single JSON response a non-streaming
+ * caller expects: the `response` object of the terminal event.
+ */
+export async function collapseCodexStream(response: Response): Promise<Response> {
+  const headers = new Headers(response.headers);
+  headers.delete('content-length');
+  headers.delete('transfer-encoding');
+  headers.set('content-type', 'application/json');
+
+  const events = parseSseEvents(await response.text());
+  const terminal = [...events].reverse().find((e) =>
+    e.type === 'response.completed' || e.type === 'response.incomplete' || e.type === 'response.failed',
+  );
+  if (!terminal) {
+    return new Response(JSON.stringify({ error: { message: 'Codex stream ended without a terminal response event' } }), { status: 502, headers });
+  }
+  if (terminal.type === 'response.failed') {
+    const resp = terminal.response as Record<string, unknown> | undefined;
+    return new Response(JSON.stringify({ error: resp?.error ?? { message: 'Codex response failed' } }), { status: 500, headers });
+  }
+  // The Codex backend sends an empty `output` on the terminal event; the real
+  // output items arrive one per `response.output_item.done`. Rebuild from those.
+  const final = { ...(terminal.response as Record<string, unknown>) };
+  const output = final.output;
+  if (!Array.isArray(output) || output.length === 0) {
+    final.output = events
+      .filter((e) => e.type === 'response.output_item.done' && e.item != null)
+      .map((e) => e.item);
+  }
+  return new Response(JSON.stringify(final), { status: 200, headers });
+}
 
 // =============================================================================
 // Token File I/O
@@ -271,8 +352,24 @@ export function createOAuthProviderFetch(
       debugLog(`${originalUrl} -> ${url} (token: [redacted])`);
     }
 
-    const finalInit = { ...init, headers };
-    const response = await globalThis.fetch(url, finalInit);
+    // 5. Codex subscription endpoints: force store=false / stream=true and
+    //    collapse the stream for callers that did not ask for one.
+    let body = init?.body;
+    let collapseStream = false;
+    if (providerSpec?.codexEndpoints?.includes(url)) {
+      const adapted = adaptCodexRequestBody(body);
+      if (adapted.adapted) {
+        body = adapted.body as BodyInit;
+        collapseStream = !adapted.callerWantsStream;
+      }
+    }
+
+    const finalInit = { ...init, headers, body };
+    let response = await globalThis.fetch(url, finalInit);
+    // The Codex backend omits content-type on its SSE body, so only skip when it is explicitly JSON.
+    if (collapseStream && response.ok && !(response.headers.get('content-type') ?? '').includes('application/json')) {
+      response = await collapseCodexStream(response);
+    }
 
     if (DEBUG) {
       debugLog(`Response: ${response.status} ${response.statusText}`, { url });
