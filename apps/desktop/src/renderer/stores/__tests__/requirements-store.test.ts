@@ -3,9 +3,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useRequirementsStore, setupRequirementsListeners } from '../requirements-store';
 import type { RequirementsSet } from '../../../shared/types/requirements';
 
+const { addTask } = vi.hoisted(() => ({ addTask: vi.fn() }));
+vi.mock('../task-store', () => ({ useTaskStore: { getState: () => ({ addTask }) } }));
+
 const api = {
   requirementsRead: vi.fn(), requirementsWrite: vi.fn(), requirementsApprove: vi.fn(),
-  requirementsGenerate: vi.fn(), requirementsCancel: vi.fn(),
+  requirementsGenerate: vi.fn(), requirementsCancel: vi.fn(), requirementsRelease: vi.fn(),
   onRequirementsProgress: vi.fn(), onRequirementsDone: vi.fn(), onRequirementsError: vi.fn(),
 };
 let progressCb: (p: { runId: string; phase: string }) => void = () => {};
@@ -121,5 +124,63 @@ describe('requirements-store', () => {
     await useRequirementsStore.getState().generate('p1');
     await useRequirementsStore.getState().cancel();
     expect(api.requirementsCancel).toHaveBeenCalledWith('r9');
+  });
+  const approved: RequirementsSet = { ...set, status: 'approved', approvedAt: 't' };
+  const released: RequirementsSet = { ...approved, releases: { M1: { releasedAt: 't', tasks: [{ proposedTaskId: 'T1', specId: '001-t' }] } } };
+
+  it('release calls the API, installs the returned set as saved, and pushes tasks to the task store', async () => {
+    api.requirementsRead.mockResolvedValue({ success: true, data: { set: approved, currentBrdHash: 'H' } });
+    await useRequirementsStore.getState().load('p1', 'a');
+    const task = { id: '001-t', specId: '001-t', status: 'backlog' };
+    api.requirementsRelease.mockResolvedValue({ success: true, data: { set: released, tasks: [task] } });
+    await useRequirementsStore.getState().release('p1', 'M1');
+    expect(api.requirementsRelease).toHaveBeenCalledWith('p1', 'a', 'M1');
+    expect(addTask).toHaveBeenCalledWith(task);
+    const s = useRequirementsStore.getState();
+    expect(s.set).toEqual(released);
+    expect(s.isDirty()).toBe(false);
+    expect(s.isReleasing).toBe(false);
+    expect(s.error).toBeNull();
+  });
+
+  it('release surfaces the error and reloads the set so a partial record shows', async () => {
+    api.requirementsRead.mockResolvedValue({ success: true, data: { set: approved, currentBrdHash: 'H' } });
+    await useRequirementsStore.getState().load('p1', 'a');
+    api.requirementsRead.mockResolvedValue({ success: true, data: { set: released, currentBrdHash: 'H' } });
+    api.requirementsRelease.mockResolvedValue({ success: false, error: 'Could not create a task for T2 (u): disk full' });
+    await useRequirementsStore.getState().release('p1', 'M1');
+    const s = useRequirementsStore.getState();
+    expect(s.error).toBe('Could not create a task for T2 (u): disk full');
+    expect(s.set?.releases?.M1.tasks).toHaveLength(1);
+  });
+
+  it('releaseReason reflects the gate, dirty edits, and a running run', async () => {
+    api.requirementsRead.mockResolvedValue({ success: true, data: { set: approved, currentBrdHash: 'H' } });
+    await useRequirementsStore.getState().load('p1', 'a');
+    expect(useRequirementsStore.getState().releaseReason('M1')).toBeNull();
+    expect(useRequirementsStore.getState().releaseReason('M2')).toBe('notNext');
+    useRequirementsStore.getState().edit('requirements', 'R1', { title: 'x' });
+    expect(useRequirementsStore.getState().releaseReason('M1')).toBe('dirty');
+    useRequirementsStore.setState({ set: approved, run: { status: 'running', runId: 'r' } });
+    expect(useRequirementsStore.getState().releaseReason('M1')).toBe('running');
+  });
+
+  it('lockedIds and nextMilestone derive from the set', async () => {
+    api.requirementsRead.mockResolvedValue({ success: true, data: { set: released, currentBrdHash: 'H' } });
+    await useRequirementsStore.getState().load('p1', 'a');
+    expect([...useRequirementsStore.getState().lockedIds()].sort()).toEqual(['M1', 'R1', 'T1']);
+    expect(useRequirementsStore.getState().nextMilestone()?.id).toBe('M2');
+  });
+
+  it('refine excludes locked ids: whole-set refinement selects only unlocked ids, targeted drops locked ones', async () => {
+    api.requirementsRead.mockResolvedValue({ success: true, data: { set: released, currentBrdHash: 'H' } });
+    await useRequirementsStore.getState().load('p1', 'a');
+    api.requirementsGenerate.mockResolvedValue({ success: true, data: { runId: 'r1' } });
+    await useRequirementsStore.getState().refine('p1', 'tighten');
+    expect(api.requirementsGenerate).toHaveBeenLastCalledWith('p1', { slug: 'a', mode: 'refine', feedback: 'tighten', selection: ['M2'] });
+    useRequirementsStore.getState().toggleSelect('T1');
+    useRequirementsStore.getState().toggleSelect('M2');
+    await useRequirementsStore.getState().refine('p1', 'again');
+    expect(api.requirementsGenerate).toHaveBeenLastCalledWith('p1', { slug: 'a', mode: 'refine', feedback: 'again', selection: ['M2'] });
   });
 });

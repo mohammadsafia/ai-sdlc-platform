@@ -94,5 +94,34 @@
       "error": "Refinement failed: {{error}}"
     },
     "error": "Something went wrong: {{error}}"
+  },
+  "release": {
+    "button": "Release milestone",
+    "releasing": "Releasing…",
+    "released": "Released {{date}}",
+    "partial": "Partially released",
+    "locked": "Released",
+    "reason": {
+      "noSet": "No requirements set",
+      "notApproved": "Approve the set first",
+      "dirty": "Save your edits first",
+      "stale": "The BRD changed; regenerate and approve first",
+      "notNext": "Release earlier milestones first",
+      "complete": "Already released",
+      "running": "Wait for the current run to finish"
+    },
+    "rollup": "{{done}} of {{released}} tasks done",
+    "statusUnavailable": "not on this machine",
+    "status": {
+      "backlog": "Backlog",
+      "queue": "Queued",
+      "in_progress": "In progress",
+      "ai_review": "AI review",
+      "human_review": "Human review",
+      "done": "Done",
+      "pr_created": "PR created",
+      "error": "Error"
+    },
+    "error": "Release failed: {{error}}"
   }
 }

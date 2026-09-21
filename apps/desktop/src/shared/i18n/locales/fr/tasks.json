@@ -360,5 +360,12 @@
     "pinned": "épinglée",
     "loaded": "chargée",
     "resource": "fichier"
+  },
+  "requirementsSection": {
+    "title": "Exigences",
+    "brd": "BRD",
+    "openBrd": "Ouvrir dans Exigences",
+    "milestone": "Jalon",
+    "covers": "Couvre"
   }
 }

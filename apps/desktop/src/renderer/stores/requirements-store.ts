@@ -1,10 +1,12 @@
 // apps/desktop/src/renderer/stores/requirements-store.ts
 import { create } from 'zustand';
 
+import { lockedIds as computeLockedIds, nextReleasableMilestone, releaseGate, type ReleaseGateReason } from '../../shared/brd/release';
 import { validateRequirementsSet } from '../../shared/brd/requirements';
 import type {
   Milestone, ProposedTask, Requirement, RequirementsRunPhase, RequirementsSet,
 } from '../../shared/types/requirements';
+import { useTaskStore } from './task-store';
 
 type Section = 'requirements' | 'milestones' | 'tasks';
 type ItemOf<S extends Section> = S extends 'requirements' ? Requirement : S extends 'milestones' ? Milestone : ProposedTask;
@@ -22,11 +24,16 @@ interface RequirementsState {
   run: RunState;
   isLoading: boolean;
   isSaving: boolean;
+  isReleasing: boolean;
   error: string | null;
 
   isDirty: () => boolean;
   isStale: () => boolean;
   canApprove: () => boolean;
+  lockedIds: () => Set<string>;
+  nextMilestone: () => Milestone | null;
+  releaseReason: (milestoneId: string) => ReleaseGateReason | 'running' | null;
+  release: (projectId: string, milestoneId: string) => Promise<void>;
   reset: () => void;
   load: (projectId: string, slug: string) => Promise<void>;
   /** Re-read the BRD hash after the document was saved, keeping the set and any local edits. */
@@ -56,6 +63,7 @@ const initial = {
   run: idle,
   isLoading: false,
   isSaving: false,
+  isReleasing: false,
   error: null as string | null,
 };
 
@@ -78,6 +86,18 @@ export const useRequirementsStore = create<RequirementsState>((set, get) => {
     set({ run: { status: 'running', runId: result.data.runId, phase: 'started' } });
   };
 
+  /** Ids the model may change: everything not locked. Undefined when nothing is locked and nothing is selected. */
+  const unlockedSelection = (selection: string[]): string[] | undefined => {
+    const current = get().set;
+    if (!current) return selection.length > 0 ? selection : undefined;
+    const locked = computeLockedIds(current);
+    if (locked.size === 0) return selection.length > 0 ? selection : undefined;
+    const candidates = selection.length > 0
+      ? selection
+      : [...current.requirements, ...current.milestones, ...current.tasks].map((i) => i.id);
+    return candidates.filter((id) => !locked.has(id));
+  };
+
   return {
     ...initial,
 
@@ -89,6 +109,34 @@ export const useRequirementsStore = create<RequirementsState>((set, get) => {
     canApprove: () => {
       const { set: s, warnings } = get();
       return !!s && s.status !== 'approved' && !get().isDirty() && warnings.length === 0;
+    },
+
+    lockedIds: () => {
+      const current = get().set;
+      return current ? computeLockedIds(current) : new Set<string>();
+    },
+    nextMilestone: () => {
+      const current = get().set;
+      return current ? nextReleasableMilestone(current) : null;
+    },
+    releaseReason: (milestoneId) => {
+      if (get().run.status === 'running' || get().isReleasing) return 'running';
+      return releaseGate(get().set, get().savedSet, get().currentBrdHash, milestoneId);
+    },
+    release: async (projectId, milestoneId) => {
+      const { slug } = get();
+      if (!slug || get().releaseReason(milestoneId)) return;
+      set({ isReleasing: true, error: null });
+      const result = await window.electronAPI.requirementsRelease(projectId, slug, milestoneId);
+      if (!result.success || !result.data) {
+        // Reload first (a partial record may exist on disk), then surface the error, because load clears it.
+        await get().load(projectId, slug);
+        set({ error: result.error ?? 'Unknown error', isReleasing: false });
+        return;
+      }
+      for (const task of result.data.tasks) useTaskStore.getState().addTask(task);
+      const next = result.data.set;
+      set({ set: next, savedSet: next, warnings: validateRequirementsSet(next), isReleasing: false });
     },
 
     reset: () => set({ ...initial, run: { ...idle } }),
@@ -172,13 +220,20 @@ export const useRequirementsStore = create<RequirementsState>((set, get) => {
     refine: async (projectId, feedback) => {
       const { slug, selection } = get();
       if (!slug) return;
-      await startRun(projectId, { slug, mode: 'refine', feedback, ...(selection.length > 0 ? { selection } : {}) });
+      const scoped = unlockedSelection(selection);
+      await startRun(projectId, { slug, mode: 'refine', feedback, ...(scoped && scoped.length > 0 ? { selection: scoped } : {}) });
     },
 
     regenerate: async (projectId) => {
       const { slug } = get();
       if (!slug) return;
-      await startRun(projectId, { slug, mode: 'refine', feedback: 'The BRD changed; update the set to match it. Keep ids of items that still apply.' });
+      const scoped = unlockedSelection([]);
+      await startRun(projectId, {
+        slug,
+        mode: 'refine',
+        feedback: 'The BRD changed; update the set to match it. Keep ids of items that still apply.',
+        ...(scoped && scoped.length > 0 ? { selection: scoped } : {}),
+      });
     },
 
     cancel: async () => {

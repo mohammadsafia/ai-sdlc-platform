@@ -94,5 +94,34 @@
       "error": "L'affinage a échoué : {{error}}"
     },
     "error": "Une erreur est survenue : {{error}}"
+  },
+  "release": {
+    "button": "Publier le jalon",
+    "releasing": "Publication…",
+    "released": "Publié le {{date}}",
+    "partial": "Partiellement publié",
+    "locked": "Publié",
+    "reason": {
+      "noSet": "Aucun ensemble d'exigences",
+      "notApproved": "Approuvez d'abord l'ensemble",
+      "dirty": "Enregistrez d'abord vos modifications",
+      "stale": "Le BRD a changé ; régénérez et approuvez d'abord",
+      "notNext": "Publiez d'abord les jalons précédents",
+      "complete": "Déjà publié",
+      "running": "Attendez la fin de l'exécution en cours"
+    },
+    "rollup": "{{done}} tâche(s) sur {{released}} terminée(s)",
+    "statusUnavailable": "absent de cette machine",
+    "status": {
+      "backlog": "Backlog",
+      "queue": "En file d'attente",
+      "in_progress": "En cours",
+      "ai_review": "Revue IA",
+      "human_review": "Revue humaine",
+      "done": "Terminé",
+      "pr_created": "PR créée",
+      "error": "Erreur"
+    },
+    "error": "Échec de la publication : {{error}}"
   }
 }
